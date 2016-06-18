@@ -1,0 +1,14 @@
+---
+test1:
+  foo1: abc
+  nested1:
+    in_nested1: value
+  bla1:
+    - SECRET_KEY: VALUE
+    - 2
+    - 3
+test2:
+  foo2:
+    bar2: value
+
+
