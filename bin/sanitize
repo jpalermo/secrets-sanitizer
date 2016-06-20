@@ -1,12 +1,19 @@
 #!/usr/bin/env ruby
+lib = File.expand_path('../../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
 require 'optparse'
 require 'sanitizer'
 require 'yaml'
-
+require 'json'
 
 options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage: example.rb [options]"
+
+  opts.on("-sSECRETDIR", "--secret-dir=SECRETDIR", "Secret file directory") do |s|
+    options[:sec_dir] = s
+  end
 
   opts.on("-mMANIFEST", "--manifest=MANIFEST", "Manifest yaml") do |m|
     options[:manifest] = m
@@ -17,7 +24,7 @@ yaml = YAML.load_file(options[:manifest])
 config_pattern = File.read(File.join(File.expand_path(File.dirname(__FILE__)), '../spec/fixture', 'config'))
 
 patterns = []
-
+secrets = {}
 
 config_pattern.each_line do |p|
   patterns << Regexp.new(p.strip)
@@ -26,8 +33,33 @@ end
 Sanitizer::YamlTraverser.traverse(yaml) do |k, v, h|
   patterns.each do |p|
     unless p.match(k).nil?
-      puts "#{k}: {{#{h.join('_')}}}"
-      puts "#{h.join('_')}: #{v}"
+      key = h.join('_')
+      secrets[key] = v
+
+      # navigate to the key in the yaml so we can overwrite 
+      m = yaml
+      (0..h.size-2).each do |hh|
+        m = m.fetch(h[hh])
+      end
+      m[h[-1]] = "'{{#{key}}}'" #replace with mustache syntax like '{{ properties_aws_key }}' 
     end
   end
 end
+
+
+File.open(options[:manifest], 'w') do |file|
+  file.write YAML.dump(yaml)
+end
+
+#require 'pry'
+#binding.pry
+
+json_secret_file = File.join(
+  File.expand_path(options[:sec_dir]),
+  "/secrets-#{File.basename(options[:manifest], '.yml')}.json"
+)
+puts json_secret_file
+File.open(json_secret_file, 'w') do |file|
+  file.write secrets.to_json
+end
+
