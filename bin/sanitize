@@ -5,7 +5,6 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'optparse'
 require 'sanitizer'
 require 'yaml'
-require 'json'
 
 options = {}
 OptionParser.new do |opts|
@@ -27,40 +26,22 @@ end.parse!
 yaml = YAML.load_file(options[:manifest])
 config_pattern = File.read(options[:pattern_file])
 
-patterns = []
-secrets = {}
-
-config_pattern.each_line do |p|
-  patterns << Regexp.new(p.strip)
-end
-
-Sanitizer::YamlTraverser.traverse(yaml) do |k, v, h|
-  patterns.each do |p|
-    unless p.match(k).nil?
-      key = h.join('_')
-      secrets[key] = v
-
-      # navigate to the key in the yaml so we can overwrite 
-      m = yaml
-      (0..h.size-2).each do |hh|
-        m = m.fetch(h[hh])
-      end
-      m[h[-1]] = "'{{#{key}}}'" #replace with mustache syntax like '{{ properties_aws_key }}' 
-    end
-  end
-end
-
-
-File.open(options[:manifest], 'w') do |file|
-  file.write YAML.dump(yaml)
-end
-
 json_secret_file = File.join(
   File.expand_path(options[:sec_dir]),
   "/secrets-#{File.basename(options[:manifest], '.yml')}.json"
 )
-puts json_secret_file
+
+replacer = Sanitizer::MustacheReplacer.new(config_pattern, yaml)
+
+Sanitizer::YamlTraverser.traverse(yaml) do |k, v, h|
+  replacer.replace(k, v, h)
+end
+
+File.open(options[:manifest], 'w') do |file|
+  file.write replacer.manifest_yaml
+end
+
 File.open(json_secret_file, 'w') do |file|
-  file.write secrets.to_json
+  file.write replacer.secrets_json
 end
 

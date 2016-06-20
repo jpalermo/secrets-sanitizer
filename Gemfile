@@ -9,5 +9,5 @@ group :development, :test do
   gem "pry"
   gem 'guard'
   gem 'guard-rspec'
-  gem 'memfs'
+  gem 'simplecov'
 end

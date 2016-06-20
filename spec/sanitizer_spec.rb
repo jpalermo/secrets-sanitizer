@@ -26,7 +26,7 @@ describe Sanitizer do
   end
 
   it 'extracts secrets to another file and replaces with mustache style syntax' do
-    `#{@work_dir}/../bin/sanitize -m #{@tmp_dir}/manifest_1.yml -s #{@tmp_dir} -p #{@tmp_dir}/config_1`
+    puts `#{@work_dir}/../bin/sanitize -m #{@tmp_dir}/manifest_1.yml -s #{@tmp_dir} -p #{@tmp_dir}/config_1`
 
     manifest_post_sanitize = YAML.load_file("#{@tmp_dir}/manifest_1.yml")
     secret_node = manifest_post_sanitize['bla']['foo']['bar_secret_key']
@@ -41,7 +41,7 @@ describe Sanitizer do
   end
 
   it 'works with multiple match' do
-    `#{@work_dir}/../bin/sanitize -m #{@tmp_dir}/manifest_1.yml -s #{@tmp_dir} -p #{@tmp_dir}/config_2`
+    puts `#{@work_dir}/../bin/sanitize -m #{@tmp_dir}/manifest_1.yml -s #{@tmp_dir} -p #{@tmp_dir}/config_2`
 
     manifest_post_sanitize = YAML.load_file("#{@tmp_dir}/manifest_1.yml")
     secret_node = manifest_post_sanitize['bla']['foo']['bar_secret_key']
