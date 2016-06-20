@@ -10,8 +10,7 @@ describe Sanitizer do
   end
 
   after :each do
-    puts "#{@tmp_dir}"
-#    `rm -rf #{@tmp_dir}`
+   `rm -rf #{@tmp_dir}`
   end
 
   it 'has a version number' do
@@ -26,7 +25,7 @@ describe Sanitizer do
     expect(not_secret_node).to eq("bar_not_secret_value")
     expect(File).not_to exist("#{@tmp_dir}/secrets-manifest_1.json")
 
-    output = `#{@work_dir}/../bin/sanitize -m #{@tmp_dir}/manifest_1.yml -s #{@tmp_dir}`
+    output = `#{@work_dir}/../bin/sanitize -m #{@tmp_dir}/manifest_1.yml -s #{@tmp_dir} -p #{@tmp_dir}/config`
 
     manifest_post_sanitize = YAML.load_file("#{@tmp_dir}/manifest_1.yml")
     secret_node = manifest_post_sanitize['bla']['foo']['bar_secret_key']
@@ -38,6 +37,5 @@ describe Sanitizer do
     secrets = JSON.parse(secretsFile)
     expect(secrets['bla_foo_bar_secret_key']).to eq("bar_secret_value")
     expect(secrets.length).to eq(1)
-
   end
 end

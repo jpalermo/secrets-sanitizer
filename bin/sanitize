@@ -15,13 +15,17 @@ OptionParser.new do |opts|
     options[:sec_dir] = s
   end
 
+  opts.on("-pPATTERNFILE", "--pattern-file=PATTERNFILE", "File with regex patterns to match secret keys") do |p|
+    options[:pattern_file] = p
+  end
+
   opts.on("-mMANIFEST", "--manifest=MANIFEST", "Manifest yaml") do |m|
     options[:manifest] = m
   end
 end.parse!
 
 yaml = YAML.load_file(options[:manifest])
-config_pattern = File.read(File.join(File.expand_path(File.dirname(__FILE__)), '../spec/fixture', 'config'))
+config_pattern = File.read(options[:pattern_file])
 
 patterns = []
 secrets = {}
@@ -50,9 +54,6 @@ end
 File.open(options[:manifest], 'w') do |file|
   file.write YAML.dump(yaml)
 end
-
-#require 'pry'
-#binding.pry
 
 json_secret_file = File.join(
   File.expand_path(options[:sec_dir]),
