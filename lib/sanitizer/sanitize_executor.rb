@@ -20,8 +20,10 @@ module Sanitizer
         file.write replacer.manifest_yaml
       end
 
-      File.open(json_secret_file, 'w') do |file|
-        file.write replacer.secrets_json
+      unless replacer.secrets_json.nil?
+        File.open(json_secret_file, 'w') do |file|
+          file.write replacer.secrets_json
+        end
       end
     end
   end

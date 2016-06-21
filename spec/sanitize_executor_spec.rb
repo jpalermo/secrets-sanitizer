@@ -69,4 +69,9 @@ ASDASDASDSADSAD
     check_sanitize_success('manifest_4', keys, 'redacted')
   end
 
+  it 'does not create secret file if no secrets matched the pattern' do
+    Sanitizer::SanitizeExecutor.execute("#{@tmp_dir}/manifest_1.yml",  "#{@tmp_dir}/config_4", "#{@tmp_dir}")
+    expect(File).to_not exist("#{@tmp_dir}/secrets-manifest_1.json")
+  end
+
 end

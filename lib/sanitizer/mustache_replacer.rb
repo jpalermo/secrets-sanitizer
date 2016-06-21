@@ -34,7 +34,11 @@ module Sanitizer
     end
 
     def secrets_json
-      @secrets.to_json
+      if @secrets.size > 0
+        return @secrets.to_json
+      else
+        return nil
+      end
     end
   end
 end
