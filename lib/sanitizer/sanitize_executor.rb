@@ -1,11 +1,13 @@
+require 'logger'
+
 module Sanitizer
   class SanitizeExecutor
-    def self.execute(manifest, pattern_file, sec_dir)
+    def self.execute(manifest, pattern_file, sec_dir, logger = Logger.new(STDOUT))
 
       yaml = YAML.load_file(manifest)
 
       config_pattern = File.read(pattern_file)
-      replacer = Sanitizer::MustacheReplacer.new(config_pattern, yaml)
+      replacer = Sanitizer::MustacheReplacer.new(config_pattern, yaml, logger)
 
       json_secret_file = File.join(
         File.expand_path(sec_dir),

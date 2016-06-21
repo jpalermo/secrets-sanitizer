@@ -74,4 +74,11 @@ ASDASDASDSADSAD
     expect(File).to_not exist("#{@tmp_dir}/secrets-manifest_1.json")
   end
 
+  it 'ignores values already in mustache syntax' do
+    Sanitizer::SanitizeExecutor.execute("#{@tmp_dir}/manifest_5.yml",  "#{@tmp_dir}/config_1", "#{@tmp_dir}", Logger.new(nil))
+    manifest_post_sanitize = YAML.load_file("#{@tmp_dir}/manifest_5.yml")
+    mustache_value_key = manifest_post_sanitize['bla']['foo']['bar_secret_key']
+    expect(mustache_value_key).to eq("{{bar_secret_value}}")
+
+  end
 end

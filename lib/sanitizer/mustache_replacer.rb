@@ -1,13 +1,15 @@
 require 'json'
+require 'logger'
 
 module Sanitizer
   class MustacheReplacer
 
-    def initialize(patterns, yaml)
+    def initialize(patterns, yaml, logger = Logger.new(STDOUT))
 
       @yaml = yaml
       @config_patterns = []
       @secrets = {}
+      @logger = logger
 
       patterns.each_line do |p|
         @config_patterns << Regexp.new(p.strip)
@@ -19,12 +21,16 @@ module Sanitizer
       @config_patterns.each do |p|
         unless p.match(key).nil?
           k = hierarchy.join('_')
-          @secrets[k] = value
-          m = @yaml
-          (0..hierarchy.size-2).each do |h|
-            m = m.fetch(hierarchy[h])
+          if value.match(/{{.*}}/).nil?
+            m = @yaml
+            (0..hierarchy.size-2).each do |h|
+              m = m.fetch(hierarchy[h])
+            end
+            @secrets[k] = value
+            m[hierarchy[-1]] = "'{{#{k}}}'" #replace with mustache syntax like '{{ properties_aws_key }}'
+          else
+            @logger.warn "Trying to replace a mustache syntax value for #{k}, skipping..."
           end
-          m[hierarchy[-1]] = "'{{#{k}}}'" #replace with mustache syntax like '{{ properties_aws_key }}'
         end
       end
     end
