@@ -3,7 +3,7 @@ require 'yaml'
 
 describe Sanitizer::YamlTraverser do
   let (:hash_fixture) {
-    YAML.load_file(File.join(File.expand_path(File.dirname(__FILE__)), '../spec/fixture', 'manifest_2.yml'))
+    YAML.load_file(File.join(File.expand_path(File.dirname(__FILE__)), '../spec/fixture', 'yaml_traverser_manifest_1.yml'))
   }
 
   it 'traverses the yaml and run the callback for each leaf node' do
@@ -34,7 +34,7 @@ describe Sanitizer::YamlTraverser do
     expect(traversed_hierarchy.keys).to include('foo1')
     expect(traversed_hierarchy['foo1']).to eql('test1_foo1')
     expect(traversed_hierarchy.keys).to include('SECRET_KEY')
-    expect(traversed_hierarchy['SECRET_KEY']).to eql('test1_bla1_SECRET_KEY')
+    expect(traversed_hierarchy['SECRET_KEY']).to eql('test1_bla1_0_SECRET_KEY')
     expect(traversed_hierarchy.keys).to include('in_nested1')
     expect(traversed_hierarchy['in_nested1']).to eql('test1_nested1_in_nested1')
 

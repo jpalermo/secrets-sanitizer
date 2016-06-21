@@ -16,7 +16,11 @@ module Sanitizer
           traverse(v, h, &blk)
         end
       when Array
-        hash.each {|v| traverse(v, hierarchy, &blk) }
+        hash.each_index do |i|
+          h = hierarchy.clone
+          h << i
+          traverse(hash[i], h, &blk)
+        end
       else
         #noop
       end
