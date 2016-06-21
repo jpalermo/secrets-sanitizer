@@ -21,12 +21,23 @@ OptionParser.new do |opts|
   opts.on("-mMANIFEST", "--manifest=MANIFEST", "Manifest yaml") do |m|
     options[:manifest] = m
   end
+  
+  opts.on("-dINPUT_DIR", "--input-dir=INPUTDIR", "Input directory of yaml files") do |i|
+    options[:input_dir] = i
+  end
 end.parse!
 
-json_secret_file = File.join(
-  File.expand_path(options[:sec_dir]),
-  "/secrets-#{File.basename(options[:manifest], '.yml')}.json"
-)
-
-Sanitizer::SanitizeExecutor.execute(options[:manifest], options[:pattern_file], options[:sec_dir])
+unless options[:manifest].nil?
+  Sanitizer::SanitizeExecutor.execute(options[:manifest], options[:pattern_file], options[:sec_dir])
+else
+  if options[:input_dir].nil?
+    puts 'Input dir or manifest are not specifiled'
+    exit 1
+  else
+    Dir.glob(File.join(options[:input_dir], '**', '*.yml')) do |f|
+      puts "Sanitizing file #{f}..."
+      Sanitizer::SanitizeExecutor.execute(f, options[:pattern_file], options[:sec_dir])
+    end
+  end
+end
 
