@@ -23,25 +23,10 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-yaml = YAML.load_file(options[:manifest])
-config_pattern = File.read(options[:pattern_file])
-
 json_secret_file = File.join(
   File.expand_path(options[:sec_dir]),
   "/secrets-#{File.basename(options[:manifest], '.yml')}.json"
 )
 
-replacer = Sanitizer::MustacheReplacer.new(config_pattern, yaml)
-
-Sanitizer::YamlTraverser.traverse(yaml) do |k, v, h|
-  replacer.replace(k, v, h)
-end
-
-File.open(options[:manifest], 'w') do |file|
-  file.write replacer.manifest_yaml
-end
-
-File.open(json_secret_file, 'w') do |file|
-  file.write replacer.secrets_json
-end
+Sanitizer::SanitizeExecutor.execute(options[:manifest], options[:pattern_file], options[:sec_dir])
 
