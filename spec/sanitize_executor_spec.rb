@@ -20,7 +20,7 @@ describe Sanitizer::SanitizeExecutor do
       secret_node = secret_node.fetch(key)
     end
     sanitize_key = keys.join('_')
-    expect(secret_node).to eq("'{{#{sanitize_key}}}'")
+    expect(secret_node).to eq("{{#{sanitize_key}}}")
 
     expect(File).to exist("#{@tmp_dir}/secrets-#{file_basename}.json")
     secretsFile = File.read("#{@tmp_dir}/secrets-#{file_basename}.json")

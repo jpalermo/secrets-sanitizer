@@ -27,7 +27,7 @@ module Sanitizer
               m = m.fetch(hierarchy[h])
             end
             @secrets[k] = value
-            m[hierarchy[-1]] = "'{{#{k}}}'" #replace with mustache syntax like '{{ properties_aws_key }}'
+            m[hierarchy[-1]] = "{{#{k}}}" #replace with mustache syntax like '{{ properties_aws_key }}'
           else
             @logger.warn "Trying to replace a mustache syntax value for #{k}, skipping..."
           end
