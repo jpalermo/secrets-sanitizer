@@ -79,6 +79,26 @@ ASDASDASDSADSAD
     manifest_post_sanitize = YAML.load_file("#{@tmp_dir}/manifest_5.yml")
     mustache_value_key = manifest_post_sanitize['bla']['foo']['bar_secret_key']
     expect(mustache_value_key).to eq("{{bar_secret_value}}")
+  end
+
+  it 'appends to the secrets file if one already exists' do
+    existing_secrets = JSON.parse('{"hello" : "world"}')
+    json_secret_file_path = File.join(
+      File.expand_path(@tmp_dir),
+      "/secrets-manifest_1.json"
+    )
+    File.open(json_secret_file_path, 'w') do |file|
+      file.write existing_secrets.to_json
+    end
+
+    Sanitizer::SanitizeExecutor.execute("#{@tmp_dir}/manifest_1.yml",  "#{@tmp_dir}/config_1", "#{@tmp_dir}")
+    keys=['bla','foo', 'bar_secret_key']
+
+    manifest_post_sanitize = check_sanitize_success('manifest_1',keys, 'bar_secret_value')
+
+    secretsFile = File.read(json_secret_file_path)
+    secrets = JSON.parse(secretsFile)
+    expect(secrets["hello"]).to eq("world")
 
   end
 end

@@ -4,11 +4,11 @@ require 'logger'
 module Sanitizer
   class MustacheReplacer
 
-    def initialize(patterns, yaml, logger = Logger.new(STDOUT))
+    def initialize(patterns, yaml, secrets={}, logger = Logger.new(STDOUT))
 
       @yaml = yaml
       @config_patterns = []
-      @secrets = {}
+      @secrets = secrets 
       @logger = logger
 
       patterns.each_line do |p|
