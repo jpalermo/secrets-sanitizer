@@ -1,6 +1,2 @@
-secret.*key
-aws_secret.*
-secret.*
-access_key_id
-aws_access_key
+secret
 access_key
