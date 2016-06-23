@@ -40,7 +40,7 @@ module Sanitizer
     end
 
     def manifest_yaml
-      YAML.dump(@yaml)
+      YAML.dump(@yaml, options = {:line_width => -1})
     end
 
     def secrets_json
