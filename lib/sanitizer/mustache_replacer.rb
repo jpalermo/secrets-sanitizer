@@ -8,7 +8,7 @@ module Sanitizer
 
       @yaml = yaml
       @config_patterns = []
-      @secrets = secrets 
+      @secrets = secrets
       @logger = logger
 
       patterns.each_line do |p|
@@ -18,21 +18,28 @@ module Sanitizer
     end
 
     def replace(key, value, hierarchy)
+      k = hierarchy.join('_')
+      unless value.nil?
+        unless value.to_s.match(/\(\(.*\)\)/).nil? # spiff / spruce
+          @logger.warn "Trying to replace a spiff syntax value for #{k}, skipping..."
+          return
+        end
+        unless value.to_s.match(/{{.*}}/).nil? # mustache
+          @logger.warn "Trying to replace a mustache syntax value for #{k}, skipping..."
+          return
+        end
+      end
+
       @config_patterns.each do |p|
         unless p.match(key).nil?
-          k = hierarchy.join('_')
           unless value.nil?
-            if value.match(/{{.*}}/).nil?
-              m = @yaml
-              (0..hierarchy.size-2).each do |h|
-                m = m.fetch(hierarchy[h])
-              end
-              @secrets[k] = value
-              m[hierarchy[-1]] = "{{#{k}}}" #replace with mustache syntax like '{{ properties_aws_key }}'
-            else
-              @logger.warn "Trying to replace a mustache syntax value for #{k}, skipping..."
+            m = @yaml
+            (0..hierarchy.size-2).each do |h|
+              m = m.fetch(hierarchy[h])
             end
-          else 
+            @secrets[k] = value
+            m[hierarchy[-1]] = "{{#{k}}}" #replace with mustache syntax like '{{ properties_aws_key }}'
+          else
             @logger.warn "========Found nil value for key #{key}, skipping..."
           end
         end

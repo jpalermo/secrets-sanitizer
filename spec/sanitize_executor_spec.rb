@@ -88,6 +88,13 @@ ASDASDASDSADSAD
     expect(mustache_value_key).to eq("{{bla_foo_bar_secret_key}}")
   end
 
+  it 'ignores values already in spiff syntax' do
+    Sanitizer::SanitizeExecutor.execute("#{@tmp_dir}/manifest_7.yml",  "#{@tmp_dir}/config_1", "#{@tmp_dir}", Logger.new(nil))
+    manifest_post_sanitize = YAML.load_file("#{@tmp_dir}/manifest_7.yml")
+    mustache_value_key = manifest_post_sanitize['bla']['foo']['bar_secret_key']
+    expect(mustache_value_key).to eq("((bar_secret_value))")
+  end
+
   it 'appends to the secrets file if one already exists' do
     existing_secrets = JSON.parse('{"hello" : "world"}')
     json_secret_file_path = File.join(

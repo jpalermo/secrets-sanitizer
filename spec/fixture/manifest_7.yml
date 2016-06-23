@@ -1,0 +1,5 @@
+---
+bla:
+  foo:
+    bar_secret_key: ((bar_secret_value))
+    bar_secret_key_1: bar_secret_value_1
