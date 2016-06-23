@@ -1,14 +1,14 @@
 # Sanitizer
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/sanitizer`. To experiment with that code, run `bin/console` for an interactive prompt.
+We wrote this program to consolidate secrets in one repo, instead of being spread across dozens of repos. 
+This program moves the secrets into a new repo, and replaces secrets with Mustache template references. 
 
-TODO: Delete this and the text above, and describe your gem
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-```ruby
+```
 gem 'sanitizer'
 ```
 
@@ -22,7 +22,43 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```
+Usage: example.rb [options]
+    -s, --secret-dir=SECRETDIR       Secret file directory
+    -p, --pattern-file=PATTERNFILE   File with regex patterns to match secret keys
+    -m, --manifest=MANIFEST          Manifest yaml
+    -d, --input-dir=INPUTDIR         Input directory of yaml files
+```
+
+Only use one `-m` or `-d` at a time.
+
+
+First, Create a pattern file contains the regex expression how to match the key.
+
+
+
+Example run: 
+
+
+
+```
+± jy+kx kx ag |master U:2 ?:2 ✗| → ./bin/sanitize -d /Path/to/manifests/  -p secret_regex_pattern_file -s /Path/to/store/secret_json/
+
+Sanitizing file /Path/to/manifests/manifest1.yml...
+Sanitizing file /Path/to/manifests/manifest2.yml...
+```
+
+## Gotchas
+
+`sanitizer` currently:
+
+* eats comments
+* reformats numbers like `186_000` to `186000`
+* adds quotes to unquoted strings
+* rearranging multi-line strings
+
+We encourage going over the output and being selective about acceptable changes.
+
 
 ## Development
 
@@ -32,7 +68,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/sanitizer. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/pivotal-cloudops/sanitizer. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 
 ## License
