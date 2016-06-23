@@ -32,6 +32,8 @@ module Sanitizer
             else
               @logger.warn "Trying to replace a mustache syntax value for #{k}, skipping..."
             end
+          else 
+            @logger.warn "========Found nil value for key #{key}, skipping..."
           end
         end
       end
