@@ -65,6 +65,6 @@ describe Sanitizer do
 
   it 'exit with error when manifest and input_dir are not specifiled' do
     output = `#{@work_dir}/../bin/sanitize -s #{@tmp_dir} -p #{@tmp_dir}/config_1`
-    expect(output).to eq("Input dir or manifest are not specifiled\n")
+    expect(output).to match(/Manifest or input directory is required/)
   end
 end
