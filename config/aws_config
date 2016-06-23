@@ -1,1 +1,1 @@
-(secret.*key|aws_secret.*|secret.*|access_key_id)
+(secret.*key|aws_secret.*|secret.*|access_key_id|aws_access_key|access_key)
