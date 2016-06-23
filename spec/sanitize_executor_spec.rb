@@ -81,6 +81,13 @@ ASDASDASDSADSAD
     expect(mustache_value_key).to eq("{{bar_secret_value}}")
   end
 
+  it 'ignores null or empty values for matching keys' do
+    Sanitizer::SanitizeExecutor.execute("#{@tmp_dir}/manifest_6.yml",  "#{@tmp_dir}/config_1", "#{@tmp_dir}", Logger.new(nil))
+    manifest_post_sanitize = YAML.load_file("#{@tmp_dir}/manifest_6.yml")
+    mustache_value_key = manifest_post_sanitize['bla']['foo']['bar_secret_key']
+    expect(mustache_value_key).to eq("{{bla_foo_bar_secret_key}}")
+  end
+
   it 'appends to the secrets file if one already exists' do
     existing_secrets = JSON.parse('{"hello" : "world"}')
     json_secret_file_path = File.join(

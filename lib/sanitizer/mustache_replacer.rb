@@ -21,15 +21,17 @@ module Sanitizer
       @config_patterns.each do |p|
         unless p.match(key).nil?
           k = hierarchy.join('_')
-          if value.match(/{{.*}}/).nil?
-            m = @yaml
-            (0..hierarchy.size-2).each do |h|
-              m = m.fetch(hierarchy[h])
+          unless value.nil?
+            if value.match(/{{.*}}/).nil?
+              m = @yaml
+              (0..hierarchy.size-2).each do |h|
+                m = m.fetch(hierarchy[h])
+              end
+              @secrets[k] = value
+              m[hierarchy[-1]] = "{{#{k}}}" #replace with mustache syntax like '{{ properties_aws_key }}'
+            else
+              @logger.warn "Trying to replace a mustache syntax value for #{k}, skipping..."
             end
-            @secrets[k] = value
-            m[hierarchy[-1]] = "{{#{k}}}" #replace with mustache syntax like '{{ properties_aws_key }}'
-          else
-            @logger.warn "Trying to replace a mustache syntax value for #{k}, skipping..."
           end
         end
       end
