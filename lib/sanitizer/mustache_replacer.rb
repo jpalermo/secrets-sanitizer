@@ -17,31 +17,35 @@ module Sanitizer
 
     end
 
-    def replace(key, value, hierarchy)
-      k = hierarchy.join('_')
-      unless value.nil?
-        unless value.to_s.match(/\(\(.*\)\)/).nil? # spiff / spruce
-          @logger.warn "Trying to replace a spiff syntax value for #{k}, skipping..."
-          return
-        end
-        unless value.to_s.match(/{{.*}}/).nil? # mustache
-          @logger.warn "Trying to replace a mustache syntax value for #{k}, skipping..."
-          return
-        end
-      end
+    def replace(name, value, hierarchy)
+      path = hierarchy.join('_')
 
-      @config_patterns.each do |p|
-        unless p.match(key).nil?
-          unless value.nil?
-            m = @yaml
-            (0..hierarchy.size-2).each do |h|
-              m = m.fetch(hierarchy[h])
-            end
-            @secrets[k] = value
-            m[hierarchy[-1]] = "{{#{k}}}" #replace with mustache syntax like '{{ properties_aws_key }}'
-          else
-            @logger.warn "========Found nil value for key #{key}, skipping..."
+      @config_patterns.each do |pattern|
+        if (name =~ pattern)
+          # if we don't care about logging, these matches can be moved outside the pattern loop
+          if (value.nil?)
+            @logger.warn "========Found nil value for key #{name}, skipping..."
+            return
           end
+
+          if (value.to_s =~ /\(\(.*\)\)/) # ((spiff / spruce))
+            @logger.warn "Trying to replace a spiff syntax value for #{path}, skipping..."
+            return
+          end
+
+          if (value.to_s =~ /{{.*}}/) # {{mustache}}
+            @logger.warn "Trying to replace a mustache syntax value for #{path}, skipping..."
+            return
+          end
+
+          # iterate down the yaml tree, from general to specific
+          focus = @yaml
+          (0 .. hierarchy.size - 2).each do |depth|
+            focus = focus.fetch(hierarchy[depth])
+          end
+
+          @secrets[path] = value
+          focus[hierarchy[-1]] = "{{#{path}}}" #replace with mustache syntax like '{{ properties_aws_key }}'
         end
       end
     end
