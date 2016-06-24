@@ -56,7 +56,7 @@ module Sanitizer
 
     def secrets_json
       if @secrets.size > 0
-        return @secrets.to_json
+        return JSON.pretty_generate(@secrets)
       else
         return nil
       end
