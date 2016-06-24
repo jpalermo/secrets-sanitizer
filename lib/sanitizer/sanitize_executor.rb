@@ -5,13 +5,13 @@ module Sanitizer
     def self.execute(manifest, pattern_file, sec_dir, logger = Logger.new(STDOUT))
 
       yaml = YAML.load_file(manifest)
-      json_secret_file_path = File.join(
+      yaml_secret_file_path = File.join(
         File.expand_path(sec_dir),
-        "/secrets-#{File.basename(manifest, '.yml')}.json"
+        "/secrets-#{File.basename(manifest, '.yml')}.yml"
       )
       existing_secrets = {}
-      if File.exist?(json_secret_file_path)
-        existing_secrets = JSON.parse(File.read(json_secret_file_path))
+      if File.exist?(yaml_secret_file_path)
+        existing_secrets = YAML.load_file(yaml_secret_file_path)
       end
       config_pattern = File.read(pattern_file)
 
@@ -25,12 +25,11 @@ module Sanitizer
         file.write replacer.manifest_yaml
       end
 
-      unless replacer.secrets_json.nil?
-        File.open(json_secret_file_path, 'w') do |file|
-          file.write replacer.secrets_json
+      unless replacer.secrets_yaml.nil?
+        File.open(yaml_secret_file_path, 'w') do |file|
+          file.write replacer.secrets_yaml
         end
       end
     end
   end
 end
-

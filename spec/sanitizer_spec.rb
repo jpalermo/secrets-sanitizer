@@ -22,9 +22,9 @@ describe Sanitizer do
     sanitize_key = keys.join('_')
     expect(secret_node).to eq("{{#{sanitize_key}}}")
 
-    expect(File).to exist("#{@tmp_dir}/secrets-#{file_basename}.json")
-    secretsFile = File.read("#{@tmp_dir}/secrets-#{file_basename}.json")
-    secrets = JSON.parse(secretsFile)
+    expect(File).to exist("#{@tmp_dir}/secrets-#{file_basename}.yml")
+    secretsFile = File.read("#{@tmp_dir}/secrets-#{file_basename}.yml")
+    secrets = YAML.load(secretsFile)
     expect(secrets[sanitize_key]).to eq(expect_value)
     return manifest_post_sanitize
   end

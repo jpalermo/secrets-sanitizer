@@ -54,13 +54,12 @@ module Sanitizer
       YAML.dump(@yaml, options = {:line_width => -1})
     end
 
-    def secrets_json
+    def secrets_yaml
       if @secrets.size > 0
-        return JSON.pretty_generate(@secrets)
+        return YAML.dump(@secrets)
       else
         return nil
       end
     end
   end
 end
-
