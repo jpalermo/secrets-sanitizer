@@ -1,0 +1,58 @@
+#!/usr/bin/env ruby
+lib = File.expand_path('../../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
+require 'optparse'
+require 'desanitizer'
+require 'yaml'
+
+def help
+  puts "#{$0} [options]"
+  puts "-h, --help Help. See this help message."
+  puts "-m, --manifest= Manifest file"
+  puts "-d, --input-dir= Input Directory containing yaml with secrets"
+  puts "-s, --secret-dir= Folder where all secrets will be written"
+  exit 1
+end
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{$0} [options]"
+
+  opts.on("-h", "--help", "Help") do |h|
+    help
+  end
+
+  opts.on("-sSECRETDIR", "--secret-dir=SECRETDIR", "Secret file directory") do |s|
+    options[:sec_dir] = s
+  end
+
+  opts.on("-mMANIFEST", "--manifest=MANIFEST", "Manifest yaml") do |m|
+    options[:manifest] = m
+  end
+
+  opts.on("-dINPUT_DIR", "--input-dir=INPUTDIR", "Input directory of yaml files") do |i|
+    options[:input_dir] = i
+  end
+end.parse!
+
+
+if options[:sec_dir].nil?
+  puts "Output secrets directory is required."
+  help
+end
+
+if options[:manifest].nil? and options[:input_dir].nil?
+  puts "Manifest or input directory is required."
+  help
+end
+
+unless options[:manifest].nil?
+  Sanitizer::DesanitizeExecutor.execute(options[:manifest], options[:sec_dir])
+else
+  Dir.glob(File.join(options[:input_dir], '**', '*.yml')) do |f|
+    puts "Sanitizing file #{f}..."
+    Sanitizer::DesanitizeExecutor.execute(f, options[:sec_dir])
+  end
+end
+

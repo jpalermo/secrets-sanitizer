@@ -10,4 +10,5 @@ group :development, :test do
   gem 'guard'
   gem 'guard-rspec'
   gem 'simplecov'
+  gem 'mustache'
 end
