@@ -42,4 +42,15 @@ describe Desanitizer::DesanitizeExecutor do
     expect(special_char_value_node).to eq("*")
   end
 
+  it 'replaces mustache keys with the multiline values from secrets file' do
+    Desanitizer::DesanitizeExecutor.execute("#{@tmp_dir}/sanitized_manifest_multiline.yml",  "#{@tmp_dir}")
+    keys=['bla','foo', 'multi_line_value_key']
+
+    manifest_post_desanitize = check_desanitize_success('sanitized_manifest_multiline',keys, 'bar_secret_value')
+
+    not_secret_node = manifest_post_desanitize['bla']['foo']['bar_not_secret_key']
+    expect(not_secret_node).to eq("bar_not_secret_value")
+    special_char_value_node = manifest_post_desanitize['bla']['foo']['special_char_value_key']
+    expect(special_char_value_node).to eq("*")
+  end
 end

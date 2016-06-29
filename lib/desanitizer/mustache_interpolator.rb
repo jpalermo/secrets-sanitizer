@@ -16,11 +16,6 @@ module Desanitizer
           return
         end
 
-        if (value.to_s =~ /\(\(.*\)\)/) # ((spiff / spruce))
-          @logger.warn "Trying to replace a spiff syntax value for #{path}, skipping..."
-          return
-        end
-
         if (value.to_s =~ /{{.*}}/) # {{mustache}}
           @logger.warn "Going to replace a mustache syntax value "
           focus = @yaml

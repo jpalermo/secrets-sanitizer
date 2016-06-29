@@ -1,0 +1,6 @@
+---
+bla:
+  foo:
+    bar_not_secret_key: bar_not_secret_value
+    special_char_value_key: ! '*'
+    multi_line_value_key: '{{bla_foo_multi_line_value_key}}'
