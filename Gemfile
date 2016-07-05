@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in sanitizer.gemspec
 #gemspec
 gem "rake"
+gem 'mustache', '~> 1'
 
 group :development, :test do
   gem "rspec"
@@ -10,5 +11,4 @@ group :development, :test do
   gem 'guard'
   gem 'guard-rspec'
   gem 'simplecov'
-  gem 'mustache'
 end
