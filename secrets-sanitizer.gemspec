@@ -4,15 +4,15 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'sanitizer/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "sanitizer"
+  spec.name          = "secrets-sanitizer"
   spec.version       = Sanitizer::VERSION
-  spec.authors       = ["Kai Xiang"]
+  spec.authors       = ["Pivotal Cloud OPs SF"]
   spec.email         = ["pivotal@pivotal.io"]
 
   spec.summary       = %q{ Sanitize secrets from a yaml file }
   spec.description   = %q{ Sanitize secrets from a yaml file }
   spec.homepage      = "https://run.pivotal.io"
-  spec.license       = "MIT"
+  spec.license       = "Apache-2.0"
 
   # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
   # delete this section to allow pushing this gem to any host.
