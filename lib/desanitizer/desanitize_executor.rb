@@ -3,16 +3,20 @@ require 'sanitizer'
 
 module Desanitizer
   class DesanitizeExecutor
-    def self.execute(manifest, sec_dir, logger = Logger.new(STDOUT))
+    def self.execute(manifest, sec_path, logger = Logger.new(STDOUT))
 
       yaml = YAML.load_file(manifest)
-      yaml_secret_file_path = File.join(
-        File.expand_path(sec_dir),
-        "/secrets-#{File.basename(manifest, '.yml')}.json"
-      )
+      if File.directory?(sec_path)
+        yaml_secret_file_path = File.join(
+          File.expand_path(sec_path),
+          "/secrets-#{File.basename(manifest, '.yml')}.json"
+        )
+      else
+        yaml_secret_file_path = sec_path
+      end
       if File.exist?(yaml_secret_file_path)
         secrets = JSON.parse(File.read(yaml_secret_file_path))
-      else 
+      else
         puts "Secrets file not present for YAML file #{manifest} skipping it"
         return
       end
