@@ -63,8 +63,8 @@ describe Sanitizer do
     check_sanitize_success('manifest_nested_1',keys, 'bar_secret_value_3', 'nested')
   end
 
-  it 'exit with error when manifest and input_dir are not specifiled' do
-    output = `#{@work_dir}/../bin/sanitize -s #{@tmp_dir} -p #{@tmp_dir}/config_1`
+  it 'exit with error when manifest and input_dir are not specified' do
+    output = `#{@work_dir}/../bin/sanitize -s #{@tmp_dir} -p #{@tmp_dir}/config_1 2>&1`
     expect(output).to match(/Manifest or input directory is required/)
   end
 end

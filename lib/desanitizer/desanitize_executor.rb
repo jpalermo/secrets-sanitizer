@@ -3,7 +3,7 @@ require 'sanitizer'
 
 module Desanitizer
   class DesanitizeExecutor
-    def self.execute(manifest, sec_path, logger = Logger.new(STDOUT))
+    def self.execute(manifest, sec_path, logger = Logger.new(STDERR))
 
       yaml = YAML.load_file(manifest)
       if File.directory?(sec_path)
@@ -17,7 +17,7 @@ module Desanitizer
       if File.exist?(yaml_secret_file_path)
         secrets = JSON.parse(File.read(yaml_secret_file_path))
       else
-        puts "Secrets file not present for YAML file #{manifest} skipping it"
+        $stderr.puts "Secrets file not present for YAML file #{manifest} skipping it"
         return
       end
       interpolator = Desanitizer::MustacheInterpolator.new(yaml, secrets, logger)

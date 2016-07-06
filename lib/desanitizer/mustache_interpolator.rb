@@ -3,7 +3,7 @@ require 'mustache'
 module Desanitizer
   class MustacheInterpolator < Mustache
 
-    def initialize( yaml, secrets={}, logger = Logger.new(STDOUT))
+    def initialize( yaml, secrets={}, logger = Logger.new(STDERR))
       @yaml = yaml
       @secrets = secrets
       @logger = logger

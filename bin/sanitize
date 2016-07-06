@@ -42,26 +42,37 @@ OptionParser.new do |opts|
 end.parse!
 
 
+# check arguments
+errors = []
+
 if options[:sec_dir].nil?
-  puts "Output secrets directory is required."
-  help
+  errors << "Output secrets directory is required."
 end
 
 if options[:pattern_file].nil?
-  puts "Pattern file is required."
-  help
+  errors << "Pattern file is required."
 end
 
 if options[:manifest].nil? and options[:input_dir].nil?
-  puts "Manifest or input directory is required."
-  help
+  errors << "Manifest or input directory is required."
 end
 
+unless errors.empty?
+  errors.each do |error|
+    $stderr.puts "ERROR: #{error}"
+  end
+  exit 1
+end
+
+
+# start sanitizing
 unless options[:manifest].nil?
+  # it's a file
   Sanitizer::SanitizeExecutor.execute(options[:manifest], options[:pattern_file], options[:sec_dir])
 else
+  # it's a directory
   Dir.glob(File.join(options[:input_dir], '**', '*.yml')) do |f|
-    puts "Sanitizing file #{f}..."
+    $stderr.puts "Sanitizing file #{f}..."
     Sanitizer::SanitizeExecutor.execute(f, options[:pattern_file], options[:sec_dir])
   end
 end

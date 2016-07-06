@@ -2,7 +2,7 @@ require 'logger'
 
 module Sanitizer
   class SanitizeExecutor
-    def self.execute(manifest, pattern_file, sec_dir, logger = Logger.new(STDOUT))
+    def self.execute(manifest, pattern_file, sec_dir, logger = Logger.new(STDERR))
 
       yaml = YAML.load_file(manifest)
       json_secret_file_path = File.join(
