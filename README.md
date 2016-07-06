@@ -1,7 +1,7 @@
 # Sanitizer
 
-We wrote this program to consolidate secrets in one repo, instead of being spread across dozens of repos. 
-This program moves the secrets into a new repo, and replaces secrets with Mustache template references. 
+We wrote this program to consolidate secrets in one repo, instead of being spread across dozens of repos.
+This program moves the secrets into a new repo, and replaces secrets with Mustache template references.
 
 
 ## Installation
@@ -37,7 +37,7 @@ First, Create a pattern file contains the regex expression how to match the key.
 
 
 
-Example run: 
+Example run:
 
 
 
@@ -47,6 +47,7 @@ Example run:
 Sanitizing file /Path/to/manifests/manifest1.yml...
 Sanitizing file /Path/to/manifests/manifest2.yml...
 ```
+
 
 ## Gotchas
 
