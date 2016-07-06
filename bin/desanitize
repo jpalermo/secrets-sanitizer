@@ -6,51 +6,81 @@ require 'optparse'
 require 'desanitizer'
 require 'yaml'
 
-def help
+def help exitcode=0
   puts "#{$0} [options]"
-  puts "-h, --help Help. See this help message."
-  puts "-m, --manifest= Manifest file"
-  puts "-d, --input-dir= Input Directory containing yaml with secrets"
-  puts "-s, --secret-dir= Folder where all secrets will be written"
-  exit 1
+  puts "-h, --help          Help. See this help message."
+  puts "-i, --input         Input manifest file or directory"
+  puts "-m, --manifest      [deprecated] Input manifest file"
+  puts "-d, --input-dir     [deprecated] Input Directory containing yaml with secrets"
+  puts "-s, --secret-dir    Folder where all secrets will be read"
+  exit exitcode
+end
+
+if ARGV.empty?
+  help 1
 end
 
 options = {}
 OptionParser.new do |opts|
+  options[:input] = []
   opts.banner = "Usage: #{$0} [options]"
 
-  opts.on("-h", "--help", "Help") do |h|
+  opts.on("-h", "--help", "Help") do
     help
   end
 
-  opts.on("-sSECRETDIR", "--secret-dir=SECRETDIR", "Secret file directory") do |s|
-    options[:sec_dir] = s
+  opts.on("-iINPUT", "--input=INPUT", "Input file or directory") do |option|
+    options[:input] << option
   end
 
-  opts.on("-mMANIFEST", "--manifest=MANIFEST", "Manifest yaml") do |m|
-    options[:manifest] = m
+  opts.on("-sSECRETDIR", "--secret-dir=SECRETDIR", "Secret file directory") do |option|
+    options[:sec_dir] = option
   end
 
-  opts.on("-dINPUT_DIR", "--input-dir=INPUTDIR", "Input directory of yaml files") do |i|
-    options[:input_dir] = i
+  opts.on("-mMANIFEST", "--manifest=MANIFEST", "Manifest yaml") do |option|
+    # options[:manifest] = option
+    options[:input] << option
+  end
+
+  opts.on("-dINPUT_DIR", "--input-dir=INPUTDIR", "Input directory of yaml files") do |option|
+    # options[:input_dir] = option
+    options[:input] << option
   end
 end.parse!
 
+errors = []
+if options[:input].count > 1
+  errors << "Only specify one input manifest/directory!"
+end
 
 if options[:sec_dir].nil?
-  puts "Output secrets directory is required."
-  help
+  errors << "Output secrets directory is required."
 end
 
-if options[:manifest].nil? and options[:input_dir].nil?
-  puts "Manifest or input directory is required."
-  help
+if options[:input].empty?
+  errors << "Manifest or input directory is required."
 end
 
-unless options[:manifest].nil?
-  Desanitizer::DesanitizeExecutor.execute(options[:manifest], options[:sec_dir])
+
+unless errors.empty?
+  errors.each do |error|
+    $stderr.puts "ERROR: #{error}"
+  end
+  exit 1
+end
+
+# iterate over input
+# file?
+# dir?
+
+
+if File.file?(options[:input][0])
+  # it's a file!
+  Desanitizer::DesanitizeExecutor.execute(options[:input][0], options[:sec_dir])
 else
-  Dir.glob(File.join(options[:input_dir], '**', '*.yml')) do |f|
+  # do directory
+  Dir.glob(File.join(options[:input][0], '**', '*.yml')) do |f|
+    # input << all the files
     puts "Sanitizing file #{f}..."
     Desanitizer::DesanitizeExecutor.execute(f, options[:sec_dir])
   end
