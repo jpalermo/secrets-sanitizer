@@ -6,14 +6,18 @@ require 'optparse'
 require 'sanitizer'
 require 'yaml'
 
-def help
+def help exitcode=0
   puts "#{$0} [options]"
   puts "-h, --help Help. See this help message."
   puts "-m, --manifest= Manifest file"
   puts "-d, --input-dir= Input Directory containing yaml with secrets"
   puts "-p, --pattern-file= Pattern file containing secret patterns"
   puts "-s, --secret-dir= Output folder where all secrets will be written"
-  exit 1
+  exit exitcode
+end
+
+if ARGV.empty?
+  help 1
 end
 
 options = {}
