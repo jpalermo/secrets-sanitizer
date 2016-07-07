@@ -26,8 +26,12 @@ module Desanitizer
       (0 .. hierarchy.size - 2).each do |depth|
         focus = focus.fetch(hierarchy[depth])
       end
-      focus[hierarchy[-1]] = Mustache.render(value, @secrets) #replace with  value of mustache placeholder
-
+      rendered_value = Mustache.render(value, @secrets)
+      unless rendered_value.empty?
+        focus[hierarchy[-1]] = rendered_value
+      else
+        @logger.warn "\e[31m Missing value: #{path} \e[0m "
+      end
     end
 
     def manifest_yaml
