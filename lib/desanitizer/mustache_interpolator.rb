@@ -12,12 +12,6 @@ module Desanitizer
     def interpolate(name, value, hierarchy)
       path = hierarchy.join('_')
 
-      # this test is of questionable value
-      if (value.nil?)
-        @logger.warn "\e[31m Found nil value for key #{name} \e[0m "
-        exit 1
-      end
-
       return unless (value.to_s =~ /{{.*}}/) # {{mustache}}
       # there's a mustache value, let's render it
 
@@ -30,6 +24,7 @@ module Desanitizer
         focus[hierarchy[-1]] = rendered_value
       else
         @logger.warn "\e[31m Missing value: #{path} \e[0m "
+        exit 1
       end
     end
 
