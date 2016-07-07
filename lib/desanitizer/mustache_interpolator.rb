@@ -14,14 +14,13 @@ module Desanitizer
 
       # this test is of questionable value
       if (value.nil?)
-        # @logger.warn "\e[31m Found nil value for key #{name}, skipping... \e[0m "
-        return
+        @logger.warn "\e[31m Found nil value for key #{name} \e[0m "
+        exit 1
       end
 
       return unless (value.to_s =~ /{{.*}}/) # {{mustache}}
       # there's a mustache value, let's render it
 
-      # @logger.warn "\e[31m Going to replace a mustache syntax value \e[0m "
       focus = @yaml
       (0 .. hierarchy.size - 2).each do |depth|
         focus = focus.fetch(hierarchy[depth])

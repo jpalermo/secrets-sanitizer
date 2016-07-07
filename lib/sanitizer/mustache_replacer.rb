@@ -24,17 +24,19 @@ module Sanitizer
         if (name =~ pattern)
           # if we don't care about logging, these matches can be moved outside the pattern loop
           if (value.nil?)
-            @logger.warn "========Found nil value for key #{name}, skipping..."
+            @logger.warn "\e[31m Found nil value for key #{name}, skipping... \e[0m "
             return
           end
 
           if (value.to_s =~ /\(\(.*\)\)/) # ((spiff / spruce))
-            @logger.warn "Trying to replace a spiff syntax value for #{path}, skipping..."
+            # This seems like the expected behavior, warning the operator is noisy
+            # @logger.warn "\e[31m Trying to replace a spiff syntax value for #{path}, skipping... \e[0m "
             return
           end
 
           if (value.to_s =~ /{{.*}}/) # {{mustache}}
-            @logger.warn "Trying to replace a mustache syntax value for #{path}, skipping..."
+            # This seems like the expected behavior, warning the operator is noisy
+            # @logger.warn "\e[31m Trying to replace a mustache syntax value for #{path}, skipping... \e[0m "
             return
           end
 
