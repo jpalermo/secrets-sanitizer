@@ -10,11 +10,13 @@ default_pattern_file = File.expand_path(File.join(File.dirname(__FILE__), "../co
 
 def help exitcode=0
   puts "#{$0} [options]"
-  puts "-h, --help Help. See this help message."
-  puts "-m, --manifest= Manifest file"
-  puts "-d, --input-dir= Input Directory containing yaml with secrets"
-  puts "-p, --pattern-file= Pattern file containing secret patterns"
-  puts "-s, --secret-dir= Output folder where all secrets will be written"
+  puts "-h, --help          Help. See this help message."
+  puts "-i, --input         Input manifest file or directory"
+  puts "-s, --secret-dir    Folder where all secrets will be written"
+  puts "-p, --pattern-file  (optional) Pattern file containing secrets patterns"
+  puts "                      config/catchall is used by default"
+  puts "-m, --manifest      [deprecated] Input manifest file"
+  puts "-d, --input-dir     [deprecated] Input Directory containing yaml with secrets"
   exit exitcode
 end
 
@@ -24,10 +26,16 @@ end
 
 options = {}
 OptionParser.new do |opts|
+  options[:input] = []
+
   opts.banner = "Usage: #{$0} [options]"
 
   opts.on("-h", "--help", "Help") do |h|
     help
+  end
+
+  opts.on("-iINPUT", "--input=INPUT", "Input file or directory") do |option|
+    options[:input] << option
   end
 
   opts.on("-sSECRETDIR", "--secret-dir=SECRETDIR", "Secret file directory") do |option|
@@ -39,11 +47,11 @@ OptionParser.new do |opts|
   end
 
   opts.on("-mMANIFEST", "--manifest=MANIFEST", "Manifest yaml") do |option|
-    options[:manifest] = option
+    options[:input] << option
   end
 
   opts.on("-dINPUT_DIR", "--input-dir=INPUTDIR", "Input directory of yaml files") do |option|
-    options[:input_dir] = option
+    options[:input] << option
   end
 end.parse!
 
@@ -59,7 +67,7 @@ if options[:pattern_file].nil?
   options[:pattern_file] = default_pattern_file
 end
 
-if options[:manifest].nil? and options[:input_dir].nil?
+if options[:input].empty?
   errors << "Manifest or input directory is required."
 end
 
@@ -70,16 +78,14 @@ unless errors.empty?
   exit 1
 end
 
-
 # start sanitizing
-unless options[:manifest].nil?
+if File.file?(options[:input][0])
   # it's a file
-  Sanitizer::SanitizeExecutor.execute(options[:manifest], options[:pattern_file], options[:sec_dir])
+  Sanitizer::SanitizeExecutor.execute(options[:input][0], options[:pattern_file], options[:sec_dir])
 else
   # it's a directory
-  Dir.glob(File.join(options[:input_dir], '**', '*.yml')) do |f|
-    $stderr.puts "Sanitizing file #{f}..."
-    Sanitizer::SanitizeExecutor.execute(f, options[:pattern_file], options[:sec_dir])
+  Dir.glob(File.join(options[:input][0], '**', '*.yml')) do |manifest_path|
+    Sanitizer::SanitizeExecutor.execute(manifest_path, options[:pattern_file], options[:sec_dir])
   end
 end
 

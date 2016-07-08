@@ -3,29 +3,32 @@ require 'sanitizer'
 
 module Desanitizer
   class DesanitizeExecutor
-    def self.execute(manifest, sec_path, logger = Logger.new(STDERR))
+    def self.execute(manifest_path, secrets_path, logger = Logger.new(STDERR))
 
-      yaml = YAML.load_file(manifest)
-      if File.directory?(sec_path)
-        yaml_secret_file_path = File.join(
-          File.expand_path(sec_path),
-          "/secrets-#{File.basename(manifest, '.yml')}.json"
+      manifest = YAML.load_file(manifest_path)
+
+      # if given a secrets directory, choose appropriate secrets file
+      if File.directory?(secrets_path)
+        secrets_file_path = File.join(
+          File.expand_path(secrets_path),
+          "/secrets-#{File.basename(manifest_path, '.yml')}.json"
         )
       else
-        yaml_secret_file_path = sec_path
+        secrets_file_path = secrets_path
       end
-      if File.exist?(yaml_secret_file_path)
-        secrets = JSON.parse(File.read(yaml_secret_file_path))
+
+      if File.exist?(secrets_file_path)
+        secrets = JSON.parse(File.read(secrets_file_path))
       else
-        $stderr.puts "Secrets file not present for YAML file #{manifest} skipping it"
+        $stderr.puts "Secrets file not present for YAML file #{manifest_path} skipping it"
         return
       end
-      interpolator = Desanitizer::MustacheInterpolator.new(yaml, secrets, logger)
-      Sanitizer::YamlTraverser.traverse(yaml) do |k, v, h|
+      interpolator = Desanitizer::MustacheInterpolator.new(manifest, secrets, logger)
+      Sanitizer::YamlTraverser.traverse(manifest) do |k, v, h|
         interpolator.interpolate(k, v, h)
       end
 
-      File.open(manifest, 'w') do |file|
+      File.open(manifest_path, 'w') do |file|
         file.write interpolator.manifest_yaml
       end
     end
