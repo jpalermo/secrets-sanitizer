@@ -18,7 +18,7 @@ module Desanitizer
       if File.exist?(secrets_path)
         secrets = JSON.parse(File.read(secrets_path))
       else
-        $stderr.puts "Secrets file not present for YAML file #{manifest_path} skipping it"
+        logger.warn "Secrets file not present for YAML file #{manifest_path} skipping it"
         return
       end
       interpolator = Desanitizer::MustacheInterpolator.new(manifest, secrets, logger)

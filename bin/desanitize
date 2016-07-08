@@ -5,14 +5,16 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'optparse'
 require 'desanitizer'
 require 'yaml'
+require 'logger'
 
 def help exitcode=0
   puts "#{$0} [options]"
   puts "-h, --help          Help. See this help message."
   puts "-i, --input         Input manifest file or directory"
+  puts "-s, --secret-dir    Folder where all secrets will be read"
+  puts "-v, --verbose"
   puts "-m, --manifest      [deprecated] Input manifest file"
   puts "-d, --input-dir     [deprecated] Input Directory containing yaml with secrets"
-  puts "-s, --secret-dir    Folder where all secrets will be read"
   exit exitcode
 end
 
@@ -46,6 +48,10 @@ OptionParser.new do |opts|
     # options[:input_dir] = option
     options[:input] << option
   end
+
+  opts.on("-v", "--verbose") do
+    options[:verbose] = true
+  end
 end.parse!
 
 errors = []
@@ -70,14 +76,21 @@ unless errors.empty?
 end
 
 
+logger = Logger.new(STDERR)
+if options[:verbose]
+  logger.level = Logger::DEBUG
+else
+  logger.level = Logger::ERROR
+end
+
 if File.file?(options[:input][0])
   # it's a file!
-  Desanitizer::DesanitizeExecutor.execute(options[:input][0], options[:sec_dir])
+  Desanitizer::DesanitizeExecutor.execute(options[:input][0], options[:sec_dir], logger)
 else
   # do directory
   Dir.glob(File.join(options[:input][0], '**', '*.yml')) do |f|
-    $stderr.puts "Desanitizing file #{f}..."
-    Desanitizer::DesanitizeExecutor.execute(f, options[:sec_dir])
+    logger.warn "Desanitizing file #{f}..."
+    Desanitizer::DesanitizeExecutor.execute(f, options[:sec_dir], logger)
   end
 end
 
