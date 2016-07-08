@@ -6,6 +6,8 @@ require 'optparse'
 require 'sanitizer'
 require 'yaml'
 
+default_pattern_file = File.expand_path(File.join(File.dirname(__FILE__), "../config/catchall"))
+
 def help exitcode=0
   puts "#{$0} [options]"
   puts "-h, --help Help. See this help message."
@@ -28,20 +30,20 @@ OptionParser.new do |opts|
     help
   end
 
-  opts.on("-sSECRETDIR", "--secret-dir=SECRETDIR", "Secret file directory") do |s|
-    options[:sec_dir] = s
+  opts.on("-sSECRETDIR", "--secret-dir=SECRETDIR", "Secret file directory") do |option|
+    options[:sec_dir] = option
   end
 
-  opts.on("-pPATTERNFILE", "--pattern-file=PATTERNFILE", "File with regex patterns to match secret keys") do |p|
-    options[:pattern_file] = p
+  opts.on("-pPATTERNFILE", "--pattern-file=PATTERNFILE", "File with regex patterns to match secret keys") do |option|
+    options[:pattern_file] = option
   end
 
-  opts.on("-mMANIFEST", "--manifest=MANIFEST", "Manifest yaml") do |m|
-    options[:manifest] = m
+  opts.on("-mMANIFEST", "--manifest=MANIFEST", "Manifest yaml") do |option|
+    options[:manifest] = option
   end
 
-  opts.on("-dINPUT_DIR", "--input-dir=INPUTDIR", "Input directory of yaml files") do |i|
-    options[:input_dir] = i
+  opts.on("-dINPUT_DIR", "--input-dir=INPUTDIR", "Input directory of yaml files") do |option|
+    options[:input_dir] = option
   end
 end.parse!
 
@@ -54,7 +56,7 @@ if options[:sec_dir].nil?
 end
 
 if options[:pattern_file].nil?
-  errors << "Pattern file is required."
+  options[:pattern_file] = default_pattern_file
 end
 
 if options[:manifest].nil? and options[:input_dir].nil?
