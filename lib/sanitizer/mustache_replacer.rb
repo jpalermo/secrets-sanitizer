@@ -30,19 +30,17 @@ module Sanitizer
 
           if (value.to_s =~ /\(\(.*\)\)/) # ((spiff / spruce))
             # This seems like the expected behavior, warning the operator is noisy
-            # @logger.warn "\e[31m Trying to replace a spiff syntax value for #{path}, skipping... \e[0m "
+            @logger.warn "\e[31m Trying to replace a spiff syntax value for #{path}, skipping... \e[0m "
             return
           end
 
           if (value.to_s =~ /{{.*}}/) # {{mustache}}
-            # This seems like the expected behavior, warning the operator is noisy
-            # @logger.warn "\e[31m Trying to replace a mustache syntax value for #{path}, skipping... \e[0m "
+            @logger.warn "\e[31m Trying to replace a mustache syntax value for #{path}, skipping... \e[0m "
             return
           end
 
           if (value.to_s =~ /<%.*%>/) # <% erb %>
-            # This seems like the expected behavior, warning the operator is noisy
-            # @logger.warn "\e[31m Trying to replace an erb syntax value for #{path}, skipping... \e[0m "
+            @logger.warn "\e[31m Trying to replace an erb syntax value for #{path}, skipping... \e[0m "
             return
           end
 

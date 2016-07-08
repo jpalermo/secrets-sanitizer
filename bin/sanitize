@@ -15,6 +15,7 @@ def help exitcode=0
   puts "-s, --secret-dir    Folder where all secrets will be written"
   puts "-p, --pattern-file  (optional) Pattern file containing secrets patterns"
   puts "                      config/catchall is used by default"
+  puts "-v, --verbose"
   puts "-m, --manifest      [deprecated] Input manifest file"
   puts "-d, --input-dir     [deprecated] Input Directory containing yaml with secrets"
   exit exitcode
@@ -53,6 +54,10 @@ OptionParser.new do |opts|
   opts.on("-dINPUT_DIR", "--input-dir=INPUTDIR", "Input directory of yaml files") do |option|
     options[:input] << option
   end
+
+  opts.on("-v", "--verbose") do
+    options[:verbose] = true
+  end
 end.parse!
 
 
@@ -78,14 +83,22 @@ unless errors.empty?
   exit 1
 end
 
+logger = Logger.new(STDERR)
+if options[:verbose]
+  logger.level = Logger::DEBUG
+else
+  logger.level = Logger::ERROR
+end
+
 # start sanitizing
 if File.file?(options[:input][0])
   # it's a file
-  Sanitizer::SanitizeExecutor.execute(options[:input][0], options[:pattern_file], options[:sec_dir])
+  Sanitizer::SanitizeExecutor.execute(options[:input][0], options[:pattern_file], options[:sec_dir], logger)
 else
   # it's a directory
   Dir.glob(File.join(options[:input][0], '**', '*.yml')) do |manifest_path|
-    Sanitizer::SanitizeExecutor.execute(manifest_path, options[:pattern_file], options[:sec_dir])
+    logger.warn "Sanitizing file #{manifest_path}..."
+    Sanitizer::SanitizeExecutor.execute(manifest_path, options[:pattern_file], options[:sec_dir], logger)
   end
 end
 
