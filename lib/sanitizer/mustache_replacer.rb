@@ -40,6 +40,12 @@ module Sanitizer
             return
           end
 
+          if (value.to_s =~ /<%.*%>/) # <% erb %>
+            # This seems like the expected behavior, warning the operator is noisy
+            # @logger.warn "\e[31m Trying to replace an erb syntax value for #{path}, skipping... \e[0m "
+            return
+          end
+
           # iterate down the yaml tree, from general to specific
           focus = @yaml
           (0 .. hierarchy.size - 2).each do |depth|
