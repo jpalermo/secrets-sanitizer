@@ -23,7 +23,7 @@ module Desanitizer
       unless rendered_value.empty?
         focus[hierarchy[-1]] = rendered_value
       else
-        @logger.warn "\e[31m Missing value  #{path}: #{value} \e[0m "
+        @logger.error "\e[31m Missing value  #{path}: #{value} \e[0m "
         exit 1
       end
     end
