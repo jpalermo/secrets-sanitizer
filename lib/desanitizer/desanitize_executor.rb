@@ -9,16 +9,14 @@ module Desanitizer
 
       # if given a secrets directory, choose appropriate secrets file
       if File.directory?(secrets_path)
-        secrets_file_path = File.join(
+        secrets_path = File.join(
           File.expand_path(secrets_path),
           "/secrets-#{File.basename(manifest_path, '.yml')}.json"
         )
-      else
-        secrets_file_path = secrets_path
       end
 
-      if File.exist?(secrets_file_path)
-        secrets = JSON.parse(File.read(secrets_file_path))
+      if File.exist?(secrets_path)
+        secrets = JSON.parse(File.read(secrets_path))
       else
         $stderr.puts "Secrets file not present for YAML file #{manifest_path} skipping it"
         return
