@@ -35,7 +35,7 @@ describe Sanitizer do
 
 
   it 'extracts secrets to another file and replaces with mustache style syntax' do
-    `#{@work_dir}/../bin/sanitize -m #{@tmp_dir}/manifest_1.yml -s #{@tmp_dir} -p #{@tmp_dir}/config_1`
+    `#{@work_dir}/../bin/sanitize -m #{@tmp_dir}/manifest_1.yml -s #{@tmp_dir} -p #{@tmp_dir}/config_1 2>&1`
     keys=['bla','foo', 'bar_secret_key']
 
     manifest_post_sanitize = check_sanitize_success('manifest_1',keys, 'bar_secret_value')
@@ -47,7 +47,7 @@ describe Sanitizer do
   end
 
   it 'works with multiple files in the directory' do
-    `#{@work_dir}/../bin/sanitize -d #{@tmp_dir} -s #{@tmp_dir} -p #{@tmp_dir}/config_1`
+    `#{@work_dir}/../bin/sanitize -d #{@tmp_dir} -s #{@tmp_dir} -p #{@tmp_dir}/config_1 2>&1`
     keys=['bla','foo', 'bar_secret_key']
     manifest_post_sanitize = check_sanitize_success('manifest_1',keys, 'bar_secret_value')
 
