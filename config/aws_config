@@ -20,3 +20,4 @@ serviceProviderCertificate
 sslPrivateKey
 sslCertificate
 (AWS|aws|Aws)?_?(SECRET|secret|Secret).*
+password
