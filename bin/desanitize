@@ -8,6 +8,8 @@ require 'yaml'
 require 'logger'
 
 def help exitcode=0
+  puts "Desantize will take secrets and place them into a previously sanitized environment"
+  puts
   puts "#{$0} [options]"
   puts "-h, --help          Help. See this help message."
   puts "-i, --input         Input manifest file or directory"

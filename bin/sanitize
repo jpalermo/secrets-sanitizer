@@ -9,6 +9,8 @@ require 'yaml'
 default_pattern_file = File.expand_path(File.join(File.dirname(__FILE__), "../config/catchall"))
 
 def help exitcode=0
+  puts "Santize will take secrets and factor them out of a given environment, placing them into a specified secrets cache"
+  puts
   puts "#{$0} [options]"
   puts "-h, --help          Help. See this help message."
   puts "-i, --input         Input manifest file or directory"
