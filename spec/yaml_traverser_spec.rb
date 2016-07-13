@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'yaml'
 
 describe Sanitizer::YamlTraverser do
   let (:hash_fixture) {

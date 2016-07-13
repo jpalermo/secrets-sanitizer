@@ -1,4 +1,6 @@
 require 'simplecov'
+require 'yaml'
+require 'json'
 SimpleCov.start do
   add_filter "spec/"
 end

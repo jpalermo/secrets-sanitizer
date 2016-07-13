@@ -1,6 +1,4 @@
 require 'spec_helper'
-require 'yaml'
-require 'json'
 
 describe Sanitizer::SanitizeExecutor do
   before :each do
