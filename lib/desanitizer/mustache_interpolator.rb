@@ -1,7 +1,7 @@
 require 'json'
-require 'mustache'
+
 module Desanitizer
-  class MustacheInterpolator < Mustache
+  class MustacheInterpolator
 
     def initialize( yaml, secrets={}, logger = Logger.new(STDERR))
       @yaml = yaml
@@ -12,20 +12,21 @@ module Desanitizer
     def interpolate(name, value, hierarchy)
       path = hierarchy.join('_')
 
-      return unless (value.to_s =~ /{{.*}}/) # {{mustache}}
-      # there's a mustache value, let's render it
+      match = value.to_s.match(/\{\{\s*([^\s\}]+)\s*\}\}/)
+      return if match.nil?
+      key = match[1]
 
       focus = @yaml
       (0 .. hierarchy.size - 2).each do |depth|
         focus = focus.fetch(hierarchy[depth])
       end
-      rendered_value = Mustache.render(value, @secrets)
-      unless rendered_value.empty?
-        focus[hierarchy[-1]] = rendered_value
-      else
+
+      unless @secrets.has_key?(key)
         @logger.error "\e[31m Missing value  #{path}: #{value} \e[0m "
         exit 1
       end
+
+      focus[hierarchy[-1]] = @secrets.fetch(key)
     end
 
     def manifest_yaml
