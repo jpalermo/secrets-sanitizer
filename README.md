@@ -71,6 +71,10 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/pivotal-cloudops/sanitizer. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
+Legal:
+If you have not previously done so, please fill out and
+submit the https://cla.pivotal.io/sign/pivotal[Contributor License Agreement].
+
 
 ## License
 
