@@ -27,5 +27,5 @@
 # limitations under the License.#!/bin/sh
 
 module Desanitizer
-  VERSION = "0.2.2"
+  VERSION = "0.2.3"
 end
