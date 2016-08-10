@@ -82,10 +82,23 @@ describe Desanitizer::DesanitizeExecutor do
     expect(special_char_value_node).to eq("*")
   end
 
-  it 'will throw an error if there is a file with secrets and NO cooresponding secrets file' do
+  it 'Throws an error if there is a file with secrets and NO cooresponding secrets file' do
     stdout, stderr, status = Open3.capture3("#{@work_dir}/../bin/desanitize -s #{@tmp_dir} -i #{@tmp_dir}")
     expect(stderr).to match(/has secrets but no corresponding secrets file/)
+    expect(status.exitstatus).to eq(1)
   end
 
+  it 'Processes shows errors, but exits 0 when given --force' do
+    stdout, stderr, status = Open3.capture3("#{@work_dir}/../bin/desanitize -s #{@tmp_dir} -i #{@tmp_dir} --force")
+    expect(stdout).to eq("")
+    expect(stderr).to match(/has secrets but no corresponding secrets file/)
+    expect(status.exitstatus).to eq(0)
+  end
+
+  it 'handles the --force option by desanitizing files that it can' do
+    stdout, stderr, status = Open3.capture3("#{@work_dir}/../bin/desanitize -s #{@tmp_dir} -i #{@tmp_dir} --force")
+    keys=['bla','foo', 'bar_secret_key']
+    check_desanitize_success("sanitized_manifest_1", keys, 'bar_secret_value')
+  end
 
 end

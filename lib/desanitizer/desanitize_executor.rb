@@ -31,7 +31,7 @@ require 'sanitizer'
 
 module Desanitizer
   class DesanitizeExecutor
-    def self.execute(manifest_path, secrets_path, logger = Logger.new(STDERR))
+    def self.execute(manifest_path, secrets_path, logger = Logger.new(STDERR), force_enabled = false)
 
       @manifest = YAML.load_file(manifest_path)
 
@@ -51,7 +51,8 @@ module Desanitizer
           return
         else
           logger.error "\e[31m This manifest #{manifest_path} has secrets but no corresponding secrets file \e[0m "
-          exit 1
+          return if     force_enabled
+          exit 1 unless force_enabled
         end
       end
 
