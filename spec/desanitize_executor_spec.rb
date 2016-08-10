@@ -29,6 +29,7 @@
 
 require 'spec_helper'
 require 'desanitizer'
+require 'open3'
 
 describe Desanitizer::DesanitizeExecutor do
   before :each do
@@ -80,4 +81,11 @@ describe Desanitizer::DesanitizeExecutor do
     special_char_value_node = manifest_post_desanitize['bla']['foo']['special_char_value_key']
     expect(special_char_value_node).to eq("*")
   end
+
+  it 'will throw an error if there is a file with secrets and NO cooresponding secrets file' do
+    stdout, stderr, status = Open3.capture3("#{@work_dir}/../bin/desanitize -s #{@tmp_dir} -i #{@tmp_dir}")
+    expect(stderr).to match(/has secrets but no corresponding secrets file/)
+  end
+
+
 end
