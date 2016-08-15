@@ -122,15 +122,25 @@ else
   logger.level = Logger::ERROR
 end
 
-# start sanitizing
-if File.file?(options[:input][0])
-  # it's a file
-  Sanitizer::SanitizeExecutor.execute(options[:input][0], options[:pattern_file], options[:sec_dir], logger)
-else
-  # it's a directory
-  Dir.glob(File.join(options[:input][0], '**', '*.yml')) do |manifest_path|
-    logger.warn "Sanitizing file #{manifest_path}..."
-    Sanitizer::SanitizeExecutor.execute(manifest_path, options[:pattern_file], options[:sec_dir], logger)
-  end
+
+
+if File.lstat(options[:input][0]).symlink?
+  logger.warn("Resolving symlink #{options[:input][0]} to #{File.readlink(options[:input][0])}")
+  options[:input][0] = File.readlink(options[:input][0])
 end
 
+if File.file?(options[:input][0])
+  # it's a file!
+  logger.warn "Sanitizing file #{options[:input][0]}..."
+  Sanitizer::SanitizeExecutor.execute(options[:input][0], options[:pattern_file], options[:sec_dir], logger)
+else
+  # do directory
+  Dir.glob(File.join(options[:input][0], '**', '*.yml')) do |this_file|
+    if File.lstat(this_file).symlink?
+      logger.warn "Skipping file #{this_file} because symlinks are skipped in directory mode"
+    else
+      logger.warn "Sanitizing file #{this_file}..."
+      Sanitizer::SanitizeExecutor.execute(this_file, options[:pattern_file], options[:sec_dir], logger)
+    end
+  end
+end
