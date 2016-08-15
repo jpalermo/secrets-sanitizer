@@ -121,10 +121,10 @@ describe Desanitizer::DesanitizeExecutor do
     keys=['bla','foo', 'bar_secret_key']
     FileUtils.cp "#{@tmp_dir}/symlinktest/sanitized_manifest_1.yml",          "#{@tmp_dir}"
     FileUtils.cp "#{@tmp_dir}/symlinktest/secrets-sanitized_manifest_1.json", "#{@tmp_dir}"
-    check_desanitize_success("sanitized_manifest_1", keys, 'bar_secret_value')
     expect(stdout).to eq("")
-    expect(stderr).to eq("")
+    expect(stderr).to match(/Resolving symlink/)
     expect(status.exitstatus).to eq(0)
+    check_desanitize_success("sanitized_manifest_1", keys, 'bar_secret_value')
   end
 
 end

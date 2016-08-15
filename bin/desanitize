@@ -120,8 +120,12 @@ else
   logger.level = Logger::ERROR
 end
 
-if File.file?(options[:input][0]) || File.lstat(options[:input][0]).symlink?
+if File.file?(options[:input][0]) && !File.lstat(options[:input][0]).symlink?
   # it's a file!
+  logger.warn "Desanitizing file #{options[:input][0]}..."
+  Desanitizer::DesanitizeExecutor.execute(options[:input][0], options[:sec_dir], logger, options[:force])
+elsif File.lstat(options[:input][0]).symlink?
+  logger.warn("Resolving symlink #{options[:input][0]} to #{File.readlink(options[:input][0])}")
   Desanitizer::DesanitizeExecutor.execute(File.readlink(options[:input][0]), options[:sec_dir], logger, options[:force])
 else
   # do directory
