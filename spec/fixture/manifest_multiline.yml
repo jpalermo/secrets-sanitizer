@@ -1,0 +1,10 @@
+---
+bla:
+  foo:
+    bar_secret_key: bar_secret_value
+    bar_not_secret_key: bar_not_secret_value
+    special_char_value_key: "*"
+    multi_line_value_key: |
+      ----------BEGIN RSA PRIVATE KEY--------
+      ASDASDASDSADSAD
+      ----------END RSA PRIVATE KEY----------

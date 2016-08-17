@@ -37,3 +37,8 @@ $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'sanitizer'
 require 'desanitizer'
 
+def compare_manifests(desanitized_yml_path, expected_output_of_desan_path)
+  desanitized_yml = YAML::load(File.open(File.expand_path(desanitized_yml_path)))
+  expected_desanitized_yml = YAML::load(File.open(File.expand_path(expected_output_of_desan_path)))
+  desanitized_yml == expected_desanitized_yml
+end

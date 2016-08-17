@@ -30,101 +30,28 @@
 require 'spec_helper'
 require 'desanitizer'
 require 'open3'
+require 'tmpdir'
 
 describe Desanitizer::DesanitizeExecutor do
-  before :each do
-    @work_dir = File.dirname(__FILE__)
-    @tmp_dir=`mktemp -d`.strip
-    `cp -rf #{@work_dir}/fixture/* #{@tmp_dir}/`
+  let(:work_dir) { File.dirname(__FILE__) }
+  let(:tmp_dir) { Dir.mktmpdir }
+
+  before do
+    FileUtils.cp_r Dir.glob("#{work_dir}/fixture/*"), "#{tmp_dir}/"
   end
 
-  after :each do
-   `rm -rf #{@tmp_dir}`
+  after do
+   FileUtils.rm_r tmp_dir
   end
-
-  def check_desanitize_success(file_basename, keys, expect_value)
-    manifest_post_desanitize = YAML.load_file("#{@tmp_dir}/#{file_basename}.yml")
-    expect(File).to exist("#{@tmp_dir}/secrets-#{file_basename}.json")
-    secrets_file = File.read("#{@tmp_dir}/secrets-#{file_basename}.json")
-    secrets = YAML.load(secrets_file)
-    secret_node = manifest_post_desanitize
-    keys.each do |key|
-      secret_node = secret_node.fetch(key)
-    end
-    desanitized_key = keys.join('_')
-    expect(secret_node).to eq(secrets[desanitized_key])
-
-    return manifest_post_desanitize
-  end
-
 
   it 'replaces mustache keys with the values from secrets file' do
-    Desanitizer::DesanitizeExecutor.execute("#{@tmp_dir}/sanitized_manifest_1.yml",  "#{@tmp_dir}")
-    keys=['bla','foo', 'bar_secret_key']
-
-    manifest_post_desanitize = check_desanitize_success('sanitized_manifest_1',keys, 'bar_secret_value')
-
-    not_secret_node = manifest_post_desanitize['bla']['foo']['bar_not_secret_key']
-    expect(not_secret_node).to eq("bar_not_secret_value")
-    special_char_value_node = manifest_post_desanitize['bla']['foo']['special_char_value_key']
-    expect(special_char_value_node).to eq("*")
+    Desanitizer::DesanitizeExecutor.execute("#{tmp_dir}/sanitized_manifest_1.yml",  "#{tmp_dir}")
+    compare_manifests "#{tmp_dir}/sanitized_manifest_1.yml", "#{tmp_dir}/manifest_1.yml"
   end
 
   it 'replaces mustache keys with the multiline values from secrets file' do
-    Desanitizer::DesanitizeExecutor.execute("#{@tmp_dir}/sanitized_manifest_multiline.yml",  "#{@tmp_dir}")
-    keys=['bla','foo', 'multi_line_value_key']
+    Desanitizer::DesanitizeExecutor.execute("#{tmp_dir}/sanitized_manifest_multiline.yml",  "#{tmp_dir}")
 
-    manifest_post_desanitize = check_desanitize_success('sanitized_manifest_multiline',keys, 'bar_secret_value')
-
-    not_secret_node = manifest_post_desanitize['bla']['foo']['bar_not_secret_key']
-    expect(not_secret_node).to eq("bar_not_secret_value")
-    special_char_value_node = manifest_post_desanitize['bla']['foo']['special_char_value_key']
-    expect(special_char_value_node).to eq("*")
+    manifest_post_desanitize = expect(compare_manifests("#{tmp_dir}/sanitized_manifest_multiline.yml", "#{tmp_dir}/manifest_multiline.yml")).to be_truthy
   end
-
-  it 'Throws an error if there is a file with secrets and NO cooresponding secrets file' do
-    stdout, stderr, status = Open3.capture3("#{@work_dir}/../bin/desanitize -s #{@tmp_dir} -i #{@tmp_dir}")
-    expect(stderr).to match(/has secrets but no corresponding secrets file/)
-    expect(status.exitstatus).to eq(1)
-  end
-
-  it 'Processes shows errors, but exits 0 when given --force' do
-    stdout, stderr, status = Open3.capture3("#{@work_dir}/../bin/desanitize -s #{@tmp_dir} -i #{@tmp_dir} --force")
-    expect(stdout).to eq("")
-    expect(stderr).to match(/has secrets but no corresponding secrets file/)
-    expect(status.exitstatus).to eq(0)
-  end
-
-  it 'handles the --force option by desanitizing files that it can' do
-    stdout, stderr, status = Open3.capture3("#{@work_dir}/../bin/desanitize -s #{@tmp_dir} -i #{@tmp_dir} --force")
-    keys=['bla','foo', 'bar_secret_key']
-    check_desanitize_success("sanitized_manifest_1", keys, 'bar_secret_value')
-  end
-
-  it 'skips symlink files when passed a directory as input' do
-    Dir.mkdir("#{@tmp_dir}/symlinktest")
-    FileUtils.cp "#{@tmp_dir}/sanitized_manifest_1.yml", "#{@tmp_dir}/symlinktest"
-    FileUtils.cp "#{@tmp_dir}/secrets-sanitized_manifest_1.json", "#{@tmp_dir}/symlinktest"
-    FileUtils.ln_s "#{@tmp_dir}/symlinktest/manifest_1.yml", "#{@tmp_dir}/symlinktest/symlink.yml"
-    stdout, stderr, status = Open3.capture3("#{@work_dir}/../bin/desanitize -s #{@tmp_dir}/symlinktest -i #{@tmp_dir}/symlinktest --verbose")
-    expect(stdout).to eq("")
-    expect(stderr).to match(/because symlinks are skipped in directory mode/)
-    expect(status.exitstatus).to eq(0)
-  end
-
-  it 'process the symlinked file when passed as a single argument' do
-    Dir.mkdir("#{@tmp_dir}/symlinktest")
-    FileUtils.mv "#{@tmp_dir}/sanitized_manifest_1.yml", "#{@tmp_dir}/symlinktest"
-    FileUtils.mv "#{@tmp_dir}/secrets-sanitized_manifest_1.json", "#{@tmp_dir}/symlinktest"
-    FileUtils.ln_s "#{@tmp_dir}/symlinktest/sanitized_manifest_1.yml", "#{@tmp_dir}/symlinktest/symlink.yml"
-    stdout, stderr, status = Open3.capture3("#{@work_dir}/../bin/desanitize -s #{@tmp_dir}/symlinktest -i #{@tmp_dir}/symlinktest/symlink.yml --verbose")
-    keys=['bla','foo', 'bar_secret_key']
-    FileUtils.cp "#{@tmp_dir}/symlinktest/sanitized_manifest_1.yml",          "#{@tmp_dir}"
-    FileUtils.cp "#{@tmp_dir}/symlinktest/secrets-sanitized_manifest_1.json", "#{@tmp_dir}"
-    expect(stdout).to eq("")
-    expect(stderr).to match(/Resolving symlink/)
-    expect(status.exitstatus).to eq(0)
-    check_desanitize_success("sanitized_manifest_1", keys, 'bar_secret_value')
-  end
-
 end
