@@ -122,7 +122,7 @@ end
 
 if File.lstat(options[:input][0]).symlink?
   logger.warn("Resolving symlink #{options[:input][0]} to #{File.readlink(options[:input][0])}")
-  options[:input][0] = File.readlink(options[:input][0])
+  options[:input][0] = File.realdirpath(options[:input][0])
 end
 
 if File.file?(options[:input][0])
