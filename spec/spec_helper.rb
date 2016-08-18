@@ -29,6 +29,9 @@
 require 'simplecov'
 require 'yaml'
 require 'json'
+require 'tmpdir'
+require 'open3'
+
 SimpleCov.start do
   add_filter "spec/"
 end
@@ -37,8 +40,9 @@ $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'sanitizer'
 require 'desanitizer'
 
-def compare_manifests(desanitized_yml_path, expected_output_of_desan_path)
-  desanitized_yml = YAML::load(File.open(File.expand_path(desanitized_yml_path)))
-  expected_desanitized_yml = YAML::load(File.open(File.expand_path(expected_output_of_desan_path)))
-  desanitized_yml == expected_desanitized_yml
+def compare_yml(path_to_yml_to_test, path_to_expected_yml)
+  modified_yml = YAML::load(File.open(File.expand_path(path_to_yml_to_test)))
+  expected_yml = YAML::load(File.open(File.expand_path(path_to_expected_yml)))
+
+  modified_yml == expected_yml
 end

@@ -48,7 +48,7 @@ describe Desanitizer::DesanitizeExecutor do
 
     it 'replaces mustache keys with the values from secrets file' do
       Desanitizer::DesanitizeExecutor.execute(original_file,  tmp_dir)
-      expect(compare_manifests(original_file, "#{tmp_dir}/manifest_1.yml")).to be_truthy
+      expect(compare_yml(original_file, "#{tmp_dir}/manifest_1.yml")).to be_truthy
     end
   end
 
@@ -57,7 +57,7 @@ describe Desanitizer::DesanitizeExecutor do
 
     it 'replaces mustache keys with the multiline values from secrets file' do
       Desanitizer::DesanitizeExecutor.execute(multiline_file,  tmp_dir)
-      expect(compare_manifests(multiline_file, "#{tmp_dir}/manifest_multiline.yml")).to be_truthy
+      expect(compare_yml(multiline_file, "#{tmp_dir}/manifest_multiline.yml")).to be_truthy
     end
   end
 end

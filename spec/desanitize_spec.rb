@@ -58,7 +58,7 @@ describe "Desanitizer executable" do
   it 'handles the --force option by desanitizing files that it can' do
     stdout, stderr, status = Open3.capture3("#{work_dir}/../bin/desanitize -s #{tmp_dir} -i #{tmp_dir} --force")
     keys=['bla','foo', 'bar_secret_key']
-    expect(compare_manifests("#{tmp_dir}/sanitized_manifest_1.yml",
+    expect(compare_yml("#{tmp_dir}/sanitized_manifest_1.yml",
       "#{tmp_dir}/manifest_1.yml")).to be_truthy
   end
 
