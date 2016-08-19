@@ -30,7 +30,6 @@
 require 'spec_helper'
 require 'desanitizer'
 require 'open3'
-require 'tmpdir'
 
 describe Desanitizer::DesanitizeExecutor do
   let(:work_dir) { File.dirname(__FILE__) }
@@ -41,17 +40,24 @@ describe Desanitizer::DesanitizeExecutor do
   end
 
   after do
-   FileUtils.rm_r tmp_dir
+    FileUtils.rm_r tmp_dir
   end
 
-  it 'replaces mustache keys with the values from secrets file' do
-    Desanitizer::DesanitizeExecutor.execute("#{tmp_dir}/sanitized_manifest_1.yml",  "#{tmp_dir}")
-    compare_manifests "#{tmp_dir}/sanitized_manifest_1.yml", "#{tmp_dir}/manifest_1.yml"
+  context "when given a simple file" do
+    let(:original_file) { "#{tmp_dir}/sanitized_manifest_1.yml" }
+
+    it 'replaces mustache keys with the values from secrets file' do
+      Desanitizer::DesanitizeExecutor.execute(original_file,  tmp_dir)
+      expect(compare_yml(original_file, "#{tmp_dir}/manifest_1.yml")).to be_truthy
+    end
   end
 
-  it 'replaces mustache keys with the multiline values from secrets file' do
-    Desanitizer::DesanitizeExecutor.execute("#{tmp_dir}/sanitized_manifest_multiline.yml",  "#{tmp_dir}")
+  context "when given a multiline file" do
+    let(:multiline_file) { "#{tmp_dir}/sanitized_manifest_multiline.yml" }
 
-    manifest_post_desanitize = expect(compare_manifests("#{tmp_dir}/sanitized_manifest_multiline.yml", "#{tmp_dir}/manifest_multiline.yml")).to be_truthy
+    it 'replaces mustache keys with the multiline values from secrets file' do
+      Desanitizer::DesanitizeExecutor.execute(multiline_file,  tmp_dir)
+      expect(compare_yml(multiline_file, "#{tmp_dir}/manifest_multiline.yml")).to be_truthy
+    end
   end
 end

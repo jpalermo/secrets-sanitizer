@@ -58,10 +58,8 @@ describe "Desanitizer executable" do
   it 'handles the --force option by desanitizing files that it can' do
     stdout, stderr, status = Open3.capture3("#{work_dir}/../bin/desanitize -s #{tmp_dir} -i #{tmp_dir} --force")
     keys=['bla','foo', 'bar_secret_key']
-    # check_desanitize_success("sanitized_manifest_1.yml", keys)
-    expect(compare_manifests("#{tmp_dir}/sanitized_manifest_1.yml",
+    expect(compare_yml("#{tmp_dir}/sanitized_manifest_1.yml",
       "#{tmp_dir}/manifest_1.yml")).to be_truthy
-
   end
 
   it 'skips symlink files when passed a directory as input' do
@@ -69,7 +67,9 @@ describe "Desanitizer executable" do
     FileUtils.cp "#{tmp_dir}/sanitized_manifest_1.yml", "#{tmp_dir}/symlinktest"
     FileUtils.cp "#{tmp_dir}/secrets-sanitized_manifest_1.json", "#{tmp_dir}/symlinktest"
     FileUtils.ln_s "#{tmp_dir}/symlinktest/manifest_1.yml", "#{tmp_dir}/symlinktest/symlink.yml"
+
     stdout, stderr, status = Open3.capture3("#{work_dir}/../bin/desanitize -s #{tmp_dir}/symlinktest -i #{tmp_dir}/symlinktest --verbose")
+
     expect(stdout).to eq("")
     expect(stderr).to match(/because symlinks are skipped in directory mode/)
     expect(status.exitstatus).to eq(0)
@@ -80,6 +80,7 @@ describe "Desanitizer executable" do
     FileUtils.mv "#{tmp_dir}/sanitized_manifest_1.yml", "#{tmp_dir}/symlinktest"
     FileUtils.mv "#{tmp_dir}/secrets-sanitized_manifest_1.json", "#{tmp_dir}/symlinktest"
     FileUtils.ln_s "#{tmp_dir}/symlinktest/sanitized_manifest_1.yml", "#{tmp_dir}/symlinktest/symlink.yml"
+
     stdout, stderr, status = Open3.capture3("#{work_dir}/../bin/desanitize -s #{tmp_dir}/symlinktest -i #{tmp_dir}/symlinktest/symlink.yml --verbose")
 
     FileUtils.cp "#{tmp_dir}/symlinktest/sanitized_manifest_1.yml",          "#{tmp_dir}"
