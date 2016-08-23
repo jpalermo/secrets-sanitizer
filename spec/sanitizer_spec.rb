@@ -30,7 +30,7 @@ require 'spec_helper'
 
 describe Sanitizer do
   let(:work_dir) { File.dirname(__FILE__) }
-  let(:executable_dir) { "#{work_dir}/../bin" }
+  let(:sanitizer_executable) { "#{work_dir}/../bin/sanitize" }
   let(:fixture_dir) { "#{work_dir}/fixture" }
   let(:tmp_dir) { Dir.mktmpdir }
 
@@ -71,19 +71,19 @@ describe Sanitizer do
     it 'extracts secrets to another file' do
       secrets_file = "#{tmp_dir}/secrets-sanitized_#{manifest_to_modify.gsub(".yml", ".json")}"
 
-      stdout, _ = Open3.capture2("#{executable_dir}/sanitize -i #{tmp_dir}/#{manifest_to_modify} -s #{tmp_dir} -p #{tmp_dir}/config_1 2>&1 --verbose")
+      stdout, _ = Open3.capture2("#{sanitizer_executable} -i #{tmp_dir}/#{manifest_to_modify} -s #{tmp_dir} -p #{tmp_dir}/config_1 2>&1 --verbose")
       expect(File).to exist(secrets_file)
     end
 
     it 'extracts secrets to another file and replaces with mustache style syntax' do
-      stdout, _ = Open3.capture2("#{executable_dir}/sanitize -i #{manifest_to_modify} -s #{tmp_dir} -p #{tmp_dir}/config_1 2>&1 --verbose")
+      stdout, _ = Open3.capture2("#{sanitizer_executable} -i #{manifest_to_modify} -s #{tmp_dir} -p #{tmp_dir}/config_1 2>&1 --verbose")
       expect(compare_yml("#{tmp_dir}/sanitized_#{manifest_to_modify}", "#{fixture_dir}/sanitized_#{manifest_to_modify}")).to be_truthy
     end
   end
 
   context 'when given a directory with multiple files' do
     it 'works with multiple files in the directory' do
-      `#{work_dir}/../bin/sanitize -d #{tmp_dir} -s #{tmp_dir} -p #{tmp_dir}/config_1 2>&1`
+      `#{sanitizer_executable} -d #{tmp_dir} -s #{tmp_dir} -p #{tmp_dir}/config_1 2>&1`
       keys=['bla','foo', 'bar_secret_key']
       manifest_post_sanitize = check_sanitize_success('manifest_1', keys, 'bar_secret_value')
 
@@ -101,7 +101,7 @@ describe Sanitizer do
   end
 
   it 'exit with error when manifest and input_dir are not specified' do
-    output = `#{work_dir}/../bin/sanitize -s #{tmp_dir} -p #{tmp_dir}/config_1 2>&1`
+    output = `#{sanitizer_executable} -s #{tmp_dir} -p #{tmp_dir}/config_1 2>&1`
     expect(output).to match(/Manifest or input directory is required/)
   end
 end

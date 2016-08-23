@@ -33,6 +33,7 @@ require 'tmpdir'
 describe "Desanitizer executable" do
   let(:work_dir) { File.dirname(__FILE__) }
   let(:tmp_dir) { Dir.mktmpdir }
+  let(:desanitizer_executable) { "#{work_dir}/../bin/desanitize" }
 
   before do
     `cp -rf #{work_dir}/fixture/* #{tmp_dir}/`
@@ -43,20 +44,20 @@ describe "Desanitizer executable" do
   end
 
   it 'Throws an error if there is a file with secrets and NO cooresponding secrets file' do
-    stdout, stderr, status = Open3.capture3("#{work_dir}/../bin/desanitize -s #{tmp_dir} -i #{tmp_dir}")
+    stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir} -i #{tmp_dir}")
     expect(stderr).to match(/has secrets but no corresponding secrets file/)
     expect(status.exitstatus).to eq(1)
   end
 
   it 'Processes shows errors, but exits 0 when given --force' do
-    stdout, stderr, status = Open3.capture3("#{work_dir}/../bin/desanitize -s #{tmp_dir} -i #{tmp_dir} --force")
+    stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir} -i #{tmp_dir} --force")
     expect(stdout).to eq("")
     expect(stderr).to match(/has secrets but no corresponding secrets file/)
     expect(status.exitstatus).to eq(0)
   end
 
   it 'handles the --force option by desanitizing files that it can' do
-    stdout, stderr, status = Open3.capture3("#{work_dir}/../bin/desanitize -s #{tmp_dir} -i #{tmp_dir} --force")
+    stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir} -i #{tmp_dir} --force")
     keys=['bla','foo', 'bar_secret_key']
     expect(compare_yml("#{tmp_dir}/sanitized_manifest_1.yml",
       "#{tmp_dir}/manifest_1.yml")).to be_truthy
@@ -68,7 +69,7 @@ describe "Desanitizer executable" do
     FileUtils.cp "#{tmp_dir}/secrets-sanitized_manifest_1.json", "#{tmp_dir}/symlinktest"
     FileUtils.ln_s "#{tmp_dir}/symlinktest/manifest_1.yml", "#{tmp_dir}/symlinktest/symlink.yml"
 
-    stdout, stderr, status = Open3.capture3("#{work_dir}/../bin/desanitize -s #{tmp_dir}/symlinktest -i #{tmp_dir}/symlinktest --verbose")
+    stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir}/symlinktest -i #{tmp_dir}/symlinktest --verbose")
 
     expect(stdout).to eq("")
     expect(stderr).to match(/because symlinks are skipped in directory mode/)
@@ -81,7 +82,7 @@ describe "Desanitizer executable" do
     FileUtils.mv "#{tmp_dir}/secrets-sanitized_manifest_1.json", "#{tmp_dir}/symlinktest"
     FileUtils.ln_s "#{tmp_dir}/symlinktest/sanitized_manifest_1.yml", "#{tmp_dir}/symlinktest/symlink.yml"
 
-    stdout, stderr, status = Open3.capture3("#{work_dir}/../bin/desanitize -s #{tmp_dir}/symlinktest -i #{tmp_dir}/symlinktest/symlink.yml --verbose")
+    stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir}/symlinktest -i #{tmp_dir}/symlinktest/symlink.yml --verbose")
 
     FileUtils.cp "#{tmp_dir}/symlinktest/sanitized_manifest_1.yml",          "#{tmp_dir}"
     FileUtils.cp "#{tmp_dir}/symlinktest/secrets-sanitized_manifest_1.json", "#{tmp_dir}"
@@ -89,4 +90,11 @@ describe "Desanitizer executable" do
     expect(stderr).to match(/Resolving symlink/)
     expect(status.exitstatus).to eq(0)
   end
+
+  context "when a .secrets_sanitizer config file exists" do
+    it 'maps to the secrets directory listed in .sanitizer_config' do
+       Open3.capture3("#{desanitizer_executable}")
+    end
+  end
+
 end
