@@ -51,9 +51,6 @@ def help exitcode=0
   exit exitcode
 end
 
-if ARGV.empty?
-  help 1
-end
 
 options = {}
 OptionParser.new do |opts|
@@ -91,13 +88,25 @@ OptionParser.new do |opts|
   end
 end.parse!
 
+config_file_name = ".secrets_sanitizer"
+
+if File.exists?(config_file_name) && options[:input].empty?
+  config_file = File.open(config_file_name, "r")
+  dir_path = config_file.read.strip
+  # Brittle
+  p options[:sec_dir]  = dir_path
+  p options[:input][0] = File.expand_path(File.dirname(config_file))
+elsif !File.exists?(config_file_name) && options[:input].empty?
+  help(1)
+end
+
 errors = []
 if options[:input].count > 1
   errors << "Only specify one input manifest/directory!"
 end
 
 if options[:sec_dir].nil?
-  errors << "Output secrets directory is required."
+  errors << "Input secrets directory is required."
 end
 
 if options[:input].empty?
@@ -111,7 +120,6 @@ unless errors.empty?
   end
   exit 1
 end
-
 
 logger = Logger.new(STDERR)
 if options[:verbose]

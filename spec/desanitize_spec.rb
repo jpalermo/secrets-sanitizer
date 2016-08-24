@@ -64,14 +64,14 @@ describe "Desanitizer executable" do
         expect(status.exitstatus).to eq(0)
       end
     end
-  end
 
-  it 'handles the --force option by desanitizing files that it can' do
-    FileUtils.cp "#{work_dir}/fixture/manifest_1.yml", "#{tmp_dir}/"
-    stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir} -i #{tmp_dir} --force")
+    it 'handles the --force option by desanitizing files that it can' do
+      FileUtils.cp "#{work_dir}/fixture/manifest_1.yml", "#{tmp_dir}/"
+      stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir} -i #{tmp_dir} --force")
 
-    expect(compare_yml("#{tmp_dir}/sanitized_manifest_1.yml",
-      "#{tmp_dir}/manifest_1.yml")).to be_truthy
+      expect(compare_yml("#{tmp_dir}/sanitized_manifest_1.yml",
+        "#{tmp_dir}/manifest_1.yml")).to be_truthy
+    end
   end
 
   it 'skips symlink files when passed a directory as input' do
@@ -81,7 +81,6 @@ describe "Desanitizer executable" do
     FileUtils.ln_s "#{tmp_dir}/symlinktest/manifest_1.yml", "#{tmp_dir}/symlinktest/symlink.yml"
 
     stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir}/symlinktest -i #{tmp_dir}/symlinktest --verbose")
-
     expect(stdout).to eq("")
     expect(stderr).to match(/because symlinks are skipped in directory mode/)
     expect(status.exitstatus).to eq(0)
@@ -103,9 +102,46 @@ describe "Desanitizer executable" do
   end
 
   context "when a .secrets_sanitizer config file exists" do
-    it 'maps to the secrets directory listed in .sanitizer_config' do
-       Open3.capture3("#{desanitizer_executable}")
+    let(:secrets_dir) { tmp_dir }
+    let(:literally_anything) { anything }
+
+    it 'maps to the secrets directory listed in .secrets_sanitizer' do
+      file = File.open("#{tmp_dir}/.secrets_sanitizer", "w+") { |f|
+        f.puts secrets_dir
+      }
+      current = Dir.getwd
+      Dir.chdir(tmp_dir) # Move pwd to tmp dir
+      stdout, stderr, _ = Open3.capture3("#{desanitizer_executable}")
+      Dir.chdir(current) # Move pwd back to rspec doesn't freak out
+      expect(compare_yml("#{tmp_dir}/sanitized_manifest_1.yml",
+        "#{work_dir}/fixture/manifest_1.yml")).to be_truthy
     end
   end
+
+  context "when a .secrets_sanitizer config file doesn't exist" do
+    context "if no arguments are given" do
+      it 'shows help' do
+        stdout, _, _ = Open3.capture3(desanitizer_executable)
+        expect(stdout).to match(/-h, --help/)
+      end
+    end
+
+    context "if arguments are given" do
+      it "creates a .secrets_sanitizer file"
+    end
+  end
+
+  # context "when a .secrets_sanitizer config file doesn't exist" do
+  #   context "if no arguments are given" do
+  #     it 'shows help' do
+  #       stdout, _, _ = Open3.capture3(desanitizer_executable)
+  #       expect(stdout).to match(/-h, --help/)
+  #     end
+  #   end
+
+  #   context "if arguments are given" do
+  #     it "creates a .secrets_sanitizer file"
+  #   end
+  # end
 
 end
