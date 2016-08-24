@@ -36,29 +36,40 @@ describe "Desanitizer executable" do
   let(:desanitizer_executable) { "#{work_dir}/../bin/desanitize" }
 
   before do
-    `cp -rf #{work_dir}/fixture/* #{tmp_dir}/`
+    `cp -rf #{work_dir}/fixture/*sanitized* #{tmp_dir}/`
   end
 
   after do
     `rm -rf #{tmp_dir}`
   end
 
-  it 'Throws an error if there is a file with secrets and NO cooresponding secrets file' do
-    stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir} -i #{tmp_dir}")
-    expect(stderr).to match(/has secrets but no corresponding secrets file/)
-    expect(status.exitstatus).to eq(1)
-  end
+  context "when given a file with secrets and no corresponding secrets file" do
+    before do
+      FileUtils.cp_r Dir.glob("#{work_dir}/fixture/*"), tmp_dir
+    end
 
-  it 'Processes shows errors, but exits 0 when given --force' do
-    stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir} -i #{tmp_dir} --force")
-    expect(stdout).to eq("")
-    expect(stderr).to match(/has secrets but no corresponding secrets file/)
-    expect(status.exitstatus).to eq(0)
+    context "when the --force option is given" do
+      it 'Throws an error' do
+        stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir} -i #{tmp_dir}")
+        expect(stderr).to match(/has secrets but no corresponding secrets file/)
+        expect(status.exitstatus).to eq(1)
+      end
+    end
+
+    context "when the --force option isn't given" do
+      it 'shows errors, but exits with a 0 status' do
+        stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir} -i #{tmp_dir} --force")
+        expect(stdout).to eq("")
+        expect(stderr).to match(/has secrets but no corresponding secrets file/)
+        expect(status.exitstatus).to eq(0)
+      end
+    end
   end
 
   it 'handles the --force option by desanitizing files that it can' do
+    FileUtils.cp "#{work_dir}/fixture/manifest_1.yml", "#{tmp_dir}/"
     stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir} -i #{tmp_dir} --force")
-    keys=['bla','foo', 'bar_secret_key']
+
     expect(compare_yml("#{tmp_dir}/sanitized_manifest_1.yml",
       "#{tmp_dir}/manifest_1.yml")).to be_truthy
   end
