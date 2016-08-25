@@ -105,13 +105,13 @@ describe "Desanitizer executable" do
     let(:secrets_dir) { tmp_dir }
     let(:literally_anything) { anything }
 
-    it 'maps to the secrets directory listed in .secrets_sanitizer' do
+    it 'desanitizes a file listed in the config' do
       file = File.open("#{tmp_dir}/.secrets_sanitizer", "w+") { |f|
         f.puts secrets_dir
       }
       current = Dir.getwd
       Dir.chdir(tmp_dir) # Move pwd to tmp dir
-      stdout, stderr, _ = Open3.capture3("#{desanitizer_executable}")
+      stdout, stderr, _ = Open3.capture3(desanitizer_executable)
       Dir.chdir(current) # Move pwd back to rspec doesn't freak out
       expect(compare_yml("#{tmp_dir}/sanitized_manifest_1.yml",
         "#{work_dir}/fixture/manifest_1.yml")).to be_truthy
