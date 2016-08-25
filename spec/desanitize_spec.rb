@@ -116,6 +116,12 @@ describe "Desanitizer executable" do
       expect(compare_yml("#{tmp_dir}/sanitized_manifest_1.yml",
         "#{work_dir}/fixture/manifest_1.yml")).to be_truthy
     end
+
+    it 'ignores comments'
+
+    it 'exits with a error if the config file has multiple lines' do
+
+    end
   end
 
   context "when a .secrets_sanitizer config file doesn't exist" do
