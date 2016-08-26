@@ -1,7 +1,0 @@
----
-bla:
-  foo:
-    multi_line_value_key: |
-      ----------BEGIN RSA PRIVATE KEY--------
-      ASDASDASDSADSAD
-      ----------END RSA PRIVATE KEY----------

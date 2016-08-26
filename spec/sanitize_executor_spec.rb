@@ -55,8 +55,8 @@ describe Sanitizer::SanitizeExecutor do
   end
 
   it 'works with multiple line value keys' do
-    Sanitizer::SanitizeExecutor.execute("#{tmp_dir}/manifest_3.yml",  default_config_path, tmp_dir)
-    expect(compare_yml("#{tmp_dir}/manifest_3.yml", "#{fixture_dir}/sanitized_manifest_3.yml")).to be_truthy
+    Sanitizer::SanitizeExecutor.execute("#{tmp_dir}/manifest_multiline.yml",  default_config_path, tmp_dir)
+    expect(compare_yml("#{tmp_dir}/manifest_multiline.yml", "#{fixture_dir}/sanitized_manifest_multiline.yml")).to be_truthy
   end
 
   it 'works with multiple line value keys' do
