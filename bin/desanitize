@@ -92,10 +92,19 @@ config_file_name = ".secrets_sanitizer"
 
 if File.exists?(config_file_name) && options[:input].empty?
   config_file = File.open(config_file_name, "r")
-  dir_path = config_file.read.strip
-  # Brittle
-  p options[:sec_dir]  = dir_path
-  p options[:input][0] = File.expand_path(File.dirname(config_file))
+  lines = []
+  config_file.each_line do |line|
+    line = line.gsub(/#.*/, '').chomp
+    lines << line unless line.empty?
+  end
+
+  lines.compact!
+  raise "Invalid config file format" if lines.empty?
+
+  dir_path = lines.first.strip
+
+  options[:sec_dir]  = dir_path
+  options[:input][0] = File.expand_path(File.dirname(config_file))
 elsif !File.exists?(config_file_name) && options[:input].empty?
   help(1)
 end

@@ -117,9 +117,35 @@ describe "Desanitizer executable" do
         "#{work_dir}/fixture/manifest_1.yml")).to be_truthy
     end
 
-    it 'ignores comments'
+    it 'ignores comments in the config file' do
+      file = File.open("#{tmp_dir}/.secrets_sanitizer", "w+") { |f|
+        f.puts "# yml comment!!!!!"
+        f.puts secrets_dir
+      }
 
-    it 'exits with a error if the config file has multiple lines'
+      current = Dir.getwd
+      Dir.chdir(tmp_dir) # Move pwd to tmp dir
+      stdout, stderr, _ = Open3.capture3("#{desanitizer_executable} --verbose")
+      Dir.chdir(current) # Move pwd back to rspec doesn't freak out
+
+      ymls_are_the_same = compare_yml("#{tmp_dir}/sanitized_manifest_1.yml", "#{work_dir}/fixture/manifest_1.yml")
+      expect(ymls_are_the_same).to be_truthy
+    end
+
+    it 'throws an error (╯°□°）╯ if the config file has no input' do
+      file = File.open("#{tmp_dir}/.secrets_sanitizer", "w+") { |f|
+        f.puts "# yml comment!!!!!"
+      }
+
+      current = Dir.getwd
+      Dir.chdir(tmp_dir) # Move pwd to tmp dir
+      stdout, stderr, status = Open3.capture3("#{desanitizer_executable} --verbose")
+      Dir.chdir(current) # Move pwd back to rspec doesn't freak out
+      expect(stderr).to match(/Invalid config file format/)
+      expect(status.exitstatus).to eq(1)
+    end
+
+    it 'exits with a error if the config file has multiple lines that aren\'t comments'
   end
 
   context "when a .secrets_sanitizer config file doesn't exist" do
