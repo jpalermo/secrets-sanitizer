@@ -9,12 +9,12 @@ This program moves the secrets into a new folder, and replaces secrets with Must
 Add this line to your application's Gemfile:
 
 ```
-gem 'sanitizer'
+gem 'secrets-sanitizer'
 ```
 
 Or install it yourself as:
 
-    $ gem install sanitizer
+    $ gem install secrets-sanitizer
 
 ## Usage
 
