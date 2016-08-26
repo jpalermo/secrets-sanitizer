@@ -1,0 +1,4 @@
+---
+bla:
+  foo:
+    multi_line_value_key: "{{bla_foo_multi_line_value_key}}"
