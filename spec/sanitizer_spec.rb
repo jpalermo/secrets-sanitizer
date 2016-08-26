@@ -77,7 +77,30 @@ describe Sanitizer do
     expect(output).to match(/Manifest or input directory is required/)
   end
 
-  context "when a pattern file is given" do
-    it 'sanitizes according to the pattern file'
+  it 'skips symlink files when passed a directory as input' do
+    Dir.mkdir("#{tmp_dir}/symlinktest")
+    FileUtils.cp "#{tmp_dir}/sanitized_manifest_1.yml", "#{tmp_dir}/symlinktest"
+    FileUtils.cp "#{tmp_dir}/secrets-sanitized_manifest_1.json", "#{tmp_dir}/symlinktest"
+    FileUtils.ln_s "#{tmp_dir}/symlinktest/manifest_1.yml", "#{tmp_dir}/symlinktest/symlink.yml"
+
+    stdout, stderr, status = Open3.capture3("#{sanitizer_executable} -s #{tmp_dir}/symlinktest -i #{tmp_dir}/symlinktest --verbose")
+    expect(stdout).to eq("")
+    expect(stderr).to match(/because symlinks are skipped in directory mode/)
+    expect(status.exitstatus).to eq(0)
+  end
+
+  it 'process the symlinked file when passed as a single argument' do
+    Dir.mkdir("#{tmp_dir}/symlinktest")
+    FileUtils.mv "#{tmp_dir}/sanitized_manifest_1.yml", "#{tmp_dir}/symlinktest"
+    FileUtils.mv "#{tmp_dir}/secrets-sanitized_manifest_1.json", "#{tmp_dir}/symlinktest"
+    FileUtils.ln_s "#{tmp_dir}/symlinktest/sanitized_manifest_1.yml", "#{tmp_dir}/symlinktest/symlink.yml"
+
+    stdout, stderr, status = Open3.capture3("#{sanitizer_executable} -s #{tmp_dir}/symlinktest -i #{tmp_dir}/symlinktest/symlink.yml --verbose")
+
+    FileUtils.cp "#{tmp_dir}/symlinktest/sanitized_manifest_1.yml",          tmp_dir
+    FileUtils.cp "#{tmp_dir}/symlinktest/secrets-sanitized_manifest_1.json", tmp_dir
+    expect(stdout).to eq("")
+    expect(stderr).to match(/Resolving symlink/)
+    expect(status.exitstatus).to eq(0)
   end
 end
