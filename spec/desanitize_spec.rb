@@ -36,11 +36,11 @@ describe "Desanitizer executable" do
   let(:desanitizer_executable) { "#{work_dir}/../bin/desanitize" }
 
   before do
-    `cp -rf #{work_dir}/fixture/*sanitized* #{tmp_dir}/`
+    FileUtils.cp_r Dir.glob("#{work_dir}/fixture/*sanitized*"), tmp_dir
   end
 
   after do
-    `rm -rf #{tmp_dir}`
+    FileUtils.rm_r tmp_dir
   end
 
   context "when given a file with secrets and no corresponding secrets file" do
@@ -94,8 +94,8 @@ describe "Desanitizer executable" do
 
     stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir}/symlinktest -i #{tmp_dir}/symlinktest/symlink.yml --verbose")
 
-    FileUtils.cp "#{tmp_dir}/symlinktest/sanitized_manifest_1.yml",          "#{tmp_dir}"
-    FileUtils.cp "#{tmp_dir}/symlinktest/secrets-sanitized_manifest_1.json", "#{tmp_dir}"
+    FileUtils.cp "#{tmp_dir}/symlinktest/sanitized_manifest_1.yml",          tmp_dir
+    FileUtils.cp "#{tmp_dir}/symlinktest/secrets-sanitized_manifest_1.json", tmp_dir
     expect(stdout).to eq("")
     expect(stderr).to match(/Resolving symlink/)
     expect(status.exitstatus).to eq(0)
@@ -119,9 +119,7 @@ describe "Desanitizer executable" do
 
     it 'ignores comments'
 
-    it 'exits with a error if the config file has multiple lines' do
-
-    end
+    it 'exits with a error if the config file has multiple lines'
   end
 
   context "when a .secrets_sanitizer config file doesn't exist" do
@@ -136,18 +134,5 @@ describe "Desanitizer executable" do
       it "creates a .secrets_sanitizer file"
     end
   end
-
-  # context "when a .secrets_sanitizer config file doesn't exist" do
-  #   context "if no arguments are given" do
-  #     it 'shows help' do
-  #       stdout, _, _ = Open3.capture3(desanitizer_executable)
-  #       expect(stdout).to match(/-h, --help/)
-  #     end
-  #   end
-
-  #   context "if arguments are given" do
-  #     it "creates a .secrets_sanitizer file"
-  #   end
-  # end
 
 end
