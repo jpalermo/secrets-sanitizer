@@ -1,0 +1,5 @@
+---
+bla:
+  foo:
+    bar_secret_key_array:
+    - bar_secret_value

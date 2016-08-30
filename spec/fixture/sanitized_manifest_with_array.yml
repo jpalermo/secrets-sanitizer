@@ -1,0 +1,4 @@
+bla:
+  foo:
+    bar_secret_key_array:
+    - {{bla_foo_bar_secret_key}}
