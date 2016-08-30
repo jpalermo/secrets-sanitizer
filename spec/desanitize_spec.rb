@@ -169,7 +169,7 @@ describe "Desanitizer executable" do
       end
     end
 
-    context "if --create-config argument is given" do
+    context "if --create-config argument is given with other correct input" do
       it "creates a .secrets_sanitizer file" do
         current = Dir.getwd
         Dir.chdir(tmp_dir) # Move pwd to tmp dir
@@ -178,6 +178,20 @@ describe "Desanitizer executable" do
 
         expect(File).to exist("#{tmp_dir}/.secrets_sanitizer")
       end
+
+      it 'adds the secrets path given to the config file' do
+        current = Dir.getwd
+        Dir.chdir(tmp_dir) # Move pwd to tmp dir
+        stdout, stderr, status = Open3.capture3("#{desanitizer_executable} --verbose --create-config -i #{tmp_dir} -s #{tmp_dir}")
+        Dir.chdir(current) # Move pwd back to rspec doesn't freak out
+        contents = File.open("#{tmp_dir}/.secrets_sanitizer", "r").read
+
+        expect(contents).to match(tmp_dir)
+      end
+    end
+
+    context "when --create-config argument is given without correct input" do
+      it 'exits with a handy error message'
     end
   end
 

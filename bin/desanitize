@@ -30,6 +30,7 @@
 
 
 lib = File.expand_path('../../lib', __FILE__)
+errors = []
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'optparse'
@@ -94,22 +95,32 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-config = SanitizerConfig.new(options[:input][0])
+
+config = SanitizerConfig.new(options[:input][0], options[:sec_dir])
 
 if options[:create_config]
+  # Duplicate code that should be DRYed up later
+  if options[:sec_dir].nil?
+    errors << "Input secrets directory is required."
+  end
+
+  if options[:input].empty?
+    errors << "Manifest or input directory is required."
+  end
+  unless errors.empty?
+    errors.each do |error|
+      $stderr.puts "ERROR: #{error}"
+    end
+    exit 1
+  end
   config.create!
 elsif config.valid?
   if options[:input].empty?
-    options[:sec_dir]  = config.secrets_dir
-    options[:input][0] = config.input
+    options[:sec_dir]  = config.secrets_path
+    options[:input][0] = config.input_path
   end
 elsif config.invalid? && options[:input].empty?
   help(1)
-end
-
-errors = []
-if options[:input].count > 1
-  errors << "Only specify one input manifest/directory!"
 end
 
 if options[:sec_dir].nil?

@@ -1,24 +1,35 @@
 class SanitizerConfig
-  attr_reader :secrets_dir, :input, :file_name
+  attr_reader :file_name
 
-  def initialize(input_path)
-    @input_path = input_path
-    @file_name = ".secrets_sanitizer"
-    @config_file = find_config_file
+  def initialize(user_input_path, user_secrets_path)
+    @pwd          = Dir.getwd
+    @input_path   = user_input_path
+    @secrets_path = user_secrets_path
+    @file_name    = ".secrets_sanitizer"
+    @full_config_file_path = "#{input_path}/#{@file_name}"
   end
 
   def valid?
-    @config_file && @secrets_dir
+    config_file && secrets_path
   end
 
   def invalid?
     !valid?
   end
 
-  def find_config_file
-    return unless File.exists?(@file_name)
+  def config_file_path
+    config_file.path
+  end
 
-    config_file = File.open(@file_name, "r")
+  def config_file
+    return unless File.exists?(@full_config_file_path)
+    @config_file ||= File.open(@full_config_file_path, "r")
+  end
+
+  def config_contents
+    return @config_contents if @config_contents
+    return unless config_file
+
     lines = []
     config_file.each_line do |line|
       line = line.gsub(/#.*/, '').chomp
@@ -27,17 +38,28 @@ class SanitizerConfig
 
     lines.compact!
     raise "Invalid config file format" if lines.empty? || lines.length > 1
+    @config_contents = lines
+  end
 
-    dir_path = lines.first.strip
+  def secrets_path
+    if(@secrets_path)
+      return @secrets_path
+    elsif config_contents
+      @secrets_path = config_contents.first.strip
+    end
+  end
 
-    @secrets_dir = dir_path
-    @input = File.expand_path(File.dirname(config_file))
+  def input_path
+    return @input_path if @input_path
+    @input_path = File.expand_path(@pwd)
   end
 
   def create!
-    file = File.open("#{@input_path}/.secrets_sanitizer", "w+") { |f|
-      f.puts "# This file is awesome and does stuff for you"
-      f.puts @secrets_dir
+    file = File.open("#{@input_path}/#{@file_name}", "w+") { |f|
+      f.puts "# This file stores the location of your secrets directory"
+      f.puts "# This file's location is the implied location of the input argument"
+      f.puts "# Using #{@file_name} only works with whole directory input"
+      f.puts secrets_path
     }
   end
 end
