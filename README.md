@@ -94,12 +94,14 @@ bla:
 ## Usage
 
 ```
-sanitize [options]
+santize [options]
 -h, --help          Help. See this help message.
 -i, --input         Input manifest file or directory
 -s, --secret-dir    Folder where all secrets will be written
 -p, --pattern-file  (optional) Pattern file containing secrets patterns
                       config/catchall is used by default
+-c, --create-config Create the .secrets_sanitizer file in the given
+                    input path that contains the given secrets path
 -v, --verbose
 ```
 
@@ -122,6 +124,10 @@ because we interpret the YAML as a ruby object: `sanitizer` currently:
 * rearranging multi-line strings
 
 We encourage going over the output and being selective about acceptable changes.
+
+### Automation
+
+There is an automation feature for easier directory conversion.  Passing `--create-config` to any operation will create a `.secrets_sanitizer` file in the input directory that points toward the given secrets directoy.  If this file exists you may run both `sanitize` and `desanitize` without any arguments for input or secrets to desanitize or sanitize the entire directory.  Flags such as `--verbose` and `--force` will work as they always have in this context
 
 
 ## Development
