@@ -52,6 +52,17 @@ describe Desanitizer::DesanitizeExecutor do
     end
   end
 
+  context "when given a file with a sanitized array" do
+    let(:original_file) { "#{tmp_dir}/sanitized_manifest_with_array.yml" }
+
+    it 'replaces mustache keys inside arrays with the values from secrets file' do
+      Desanitizer::DesanitizeExecutor.execute(original_file, tmp_dir)
+      desanitized_yml = File.read(File.expand_path("#{tmp_dir}/manifest_with_array.yml"))
+      expected_yml  = File.read(File.expand_path(original_file))
+      expect(expected_yml).to eq(desanitized_yml)
+    end
+  end
+
   context "when given a multiline file" do
     let(:original_file) { "#{tmp_dir}/sanitized_manifest_multiline.yml" }
 
