@@ -145,7 +145,20 @@ describe "Desanitizer executable" do
       expect(status.exitstatus).to eq(1)
     end
 
-    it 'exits with a error if the config file has multiple lines that aren\'t comments'
+    it 'exits with a error if the config file has multiple lines that aren\'t comments' do
+      file = File.open("#{tmp_dir}/.secrets_sanitizer", "w+") { |f|
+        f.puts "/path/to/thingy"
+        f.puts "/path/to/thingy2"
+      }
+
+      current = Dir.getwd
+      Dir.chdir(tmp_dir) # Move pwd to tmp dir
+      stdout, stderr, status = Open3.capture3("#{desanitizer_executable} --verbose")
+      Dir.chdir(current) # Move pwd back to rspec doesn't freak out
+
+      expect(stderr).to match(/Invalid config file format/)
+      expect(status.exitstatus).to eq(1)
+    end
   end
 
   context "when a .secrets_sanitizer config file doesn't exist" do

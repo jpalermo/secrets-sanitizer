@@ -99,7 +99,7 @@ if File.exists?(config_file_name) && options[:input].empty?
   end
 
   lines.compact!
-  raise "Invalid config file format" if lines.empty?
+  raise "Invalid config file format" if lines.empty? || lines.length > 1
 
   dir_path = lines.first.strip
 
