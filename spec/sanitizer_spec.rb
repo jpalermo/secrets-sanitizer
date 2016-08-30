@@ -72,8 +72,8 @@ describe Sanitizer do
     end
   end
 
-  it 'exit with error when manifest and input_dir are not specified' do
-    output = `#{sanitizer_executable} -s #{tmp_dir} -p #{tmp_dir}/config_1 2>&1`
+  xit 'exit with error when manifest and input_dir are not specified' do
+    output = `#{sanitizer_executable} -s #{tmp_dir}  2>&1`
     expect(output).to match(/Manifest or input directory is required/)
   end
 
@@ -103,4 +103,97 @@ describe Sanitizer do
     expect(stderr).to match(/Resolving symlink/)
     expect(status.exitstatus).to eq(0)
   end
+
+  context "when a .secrets_sanitizer config file exists" do
+    let(:secrets_dir) { tmp_dir }
+    let(:literally_anything) { anything }
+
+    it 'sanitizes a file listed in the config' do
+      file = File.open("#{tmp_dir}/.secrets_sanitizer", "w+") { |f|
+        f.puts secrets_dir
+      }
+      current = Dir.getwd
+      Dir.chdir(tmp_dir) # Move pwd to tmp dir
+      stdout, stderr, _ = Open3.capture3(sanitizer_executable)
+      Dir.chdir(current) # Move pwd back to rspec doesn't freak out
+      expect(compare_yml("#{tmp_dir}/manifest_multiline.yml", "#{fixture_dir}/sanitized_manifest_multiline.yml")).to be_truthy
+    end
+
+    it 'ignores comments in the config file' do
+      file = File.open("#{tmp_dir}/.secrets_sanitizer", "w+") { |f|
+        f.puts "# yml comment!!!!!"
+        f.puts secrets_dir
+      }
+
+      current = Dir.getwd
+      Dir.chdir(tmp_dir) # Move pwd to tmp dir
+      stdout, stderr, _ = Open3.capture3("#{sanitizer_executable} --verbose")
+      Dir.chdir(current) # Move pwd back to rspec doesn't freak out
+
+      expect(compare_yml("#{tmp_dir}/manifest_multiline.yml", "#{fixture_dir}/sanitized_manifest_multiline.yml")).to be_truthy
+    end
+
+    it 'throws an error (╯°□°）╯ if the config file has no input' do
+      file = File.open("#{tmp_dir}/.secrets_sanitizer", "w+") { |f|
+        f.puts "# yml comment!!!!!"
+      }
+
+      current = Dir.getwd
+      Dir.chdir(tmp_dir) # Move pwd to tmp dir
+      stdout, stderr, status = Open3.capture3("#{sanitizer_executable} --verbose")
+      Dir.chdir(current) # Move pwd back to rspec doesn't freak out
+      expect(stderr).to match(/Invalid config file format/)
+      expect(status.exitstatus).to eq(1)
+    end
+
+    it 'exits with a error if the config file has multiple lines that aren\'t comments' do
+      file = File.open("#{tmp_dir}/.secrets_sanitizer", "w+") { |f|
+        f.puts "/path/to/thingy"
+        f.puts "/path/to/thingy2"
+      }
+
+      current = Dir.getwd
+      Dir.chdir(tmp_dir) # Move pwd to tmp dir
+      stdout, stderr, status = Open3.capture3("#{sanitizer_executable} --verbose")
+      Dir.chdir(current) # Move pwd back to rspec doesn't freak out
+
+      expect(stderr).to match(/Invalid config file format/)
+      expect(status.exitstatus).to eq(1)
+    end
+  end
+
+  context "when a .secrets_sanitizer config file doesn't exist" do
+    context "if no arguments are given" do
+      it 'shows help' do
+        stdout, _, _ = Open3.capture3(sanitizer_executable)
+        expect(stdout).to match(/-h, --help/)
+      end
+    end
+
+    context "if --create-config argument is given with other correct input" do
+      it "creates a .secrets_sanitizer file" do
+        current = Dir.getwd
+        Dir.chdir(tmp_dir) # Move pwd to tmp dir
+        stdout, stderr, status = Open3.capture3("#{sanitizer_executable} --verbose --create-config -i #{tmp_dir} -s /path/to/blah")
+        Dir.chdir(current) # Move pwd back to rspec doesn't freak out
+
+        expect(File).to exist("#{tmp_dir}/.secrets_sanitizer")
+      end
+
+      it 'adds the secrets path given to the config file' do
+        current = Dir.getwd
+        Dir.chdir(tmp_dir) # Move pwd to tmp dir
+        stdout, stderr, status = Open3.capture3("#{sanitizer_executable} --verbose --create-config -i #{tmp_dir} -s #{tmp_dir}")
+        Dir.chdir(current) # Move pwd back to rspec doesn't freak out
+        contents = File.open("#{tmp_dir}/.secrets_sanitizer", "r").read
+
+        expect(contents).to match(tmp_dir)
+      end
+    end
+
+    context "when --create-config argument is given without correct input" do
+      it 'exits with a handy error message'
+    end
+  end
+
 end

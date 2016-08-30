@@ -30,6 +30,7 @@
 
 
 lib = File.expand_path('../../lib', __FILE__)
+errors = []
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'optparse'
@@ -47,14 +48,12 @@ def help exitcode=0
   puts "-s, --secret-dir    Folder where all secrets will be written"
   puts "-p, --pattern-file  (optional) Pattern file containing secrets patterns"
   puts "                      config/catchall is used by default"
+  puts "-c, --create-config Create the .secrets_sanitizer file in the given"
+  puts "                    input path that contains the given secrets path"
   puts "-v, --verbose"
   puts "-m, --manifest      [deprecated] Input manifest file"
   puts "-d, --input-dir     [deprecated] Input Directory containing yaml with secrets"
   exit exitcode
-end
-
-if ARGV.empty?
-  help 1
 end
 
 options = {}
@@ -66,6 +65,12 @@ OptionParser.new do |opts|
   opts.on("-h", "--help", "Help") do |h|
     help
   end
+
+
+  opts.on("-c", "--create-config", "Create the .secrets_sanitizer file in the given input path that contains the given secrets path") do |option|
+    options[:create_config] = true
+  end
+
 
   opts.on("-iINPUT", "--input=INPUT", "Input file or directory") do |option|
     options[:input] << option
@@ -92,9 +97,35 @@ OptionParser.new do |opts|
   end
 end.parse!
 
+config = SanitizerConfig.new(options[:input][0], options[:sec_dir])
+
+if options[:create_config]
+  # Duplicate code that should be DRYed up later
+  if options[:sec_dir].nil?
+    errors << "Input secrets directory is required."
+  end
+
+  if options[:input].empty?
+    errors << "Manifest or input directory is required."
+  end
+  unless errors.empty?
+    errors.each do |error|
+      $stderr.puts "ERROR: #{error}"
+    end
+    exit 1
+  end
+  config.create!
+elsif config.valid?
+  if options[:input].empty?
+    options[:sec_dir]  = config.secrets_path
+    options[:input][0] = config.input_path
+  end
+elsif config.invalid? && options[:input].empty?
+  help(1)
+end
+
 
 # check arguments
-errors = []
 
 if options[:sec_dir].nil?
   errors << "Output secrets directory is required."

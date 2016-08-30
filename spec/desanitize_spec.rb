@@ -27,8 +27,6 @@
 # limitations under the License.#!/bin/sh
 
 require 'spec_helper'
-require 'open3'
-require 'tmpdir'
 
 describe "Desanitizer executable" do
   let(:work_dir) { File.dirname(__FILE__) }
