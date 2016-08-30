@@ -57,8 +57,8 @@ module Desanitizer
       end
 
       interpolator = Desanitizer::MustacheInterpolator.new(@manifest, secrets, logger)
-      Sanitizer::YamlTraverser.traverse(@manifest) do |k, v, h|
-        interpolator.interpolate(k, v, h)
+      Sanitizer::YamlTraverser.traverse(@manifest) do |k, v, hierarchy|
+        interpolator.interpolate(k, v, hierarchy)
       end
 
       File.open(manifest_path, 'w') do |file|

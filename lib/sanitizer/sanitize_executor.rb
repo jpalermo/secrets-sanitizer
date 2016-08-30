@@ -23,8 +23,8 @@ module Sanitizer
 
       replacer = Sanitizer::MustacheReplacer.new(config_pattern, manifest, existing_secrets, logger)
 
-      Sanitizer::YamlTraverser.traverse(manifest) do |k, v, h|
-        replacer.replace(k, v, h)
+      Sanitizer::YamlTraverser.traverse(manifest) do |k, v, hierarchy|
+        replacer.replace(k, v, hierarchy)
       end
 
       File.open(manifest_path, 'w') do |file|
