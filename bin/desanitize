@@ -38,19 +38,8 @@ require 'desanitizer'
 require 'yaml'
 require 'logger'
 
-options = SecretsSanitizerOptions.new do |opts, options_hash, custom_messages, header|
-  opts.on("-f", "--force", "Attempt to Desanitize even if secret file(s) not present") do
-    options_hash[:force] = true
-  end
 
-  header = "Desantize will take secrets and place them into a previously sanitized environment"
-  custom_messages << "-f  --force         Desanitize files even if files with secrets do not have a matching secret files"
-end
-
-config = SanitizerConfig.new(options[:input][0], options[:sec_dir])
-
-if options[:create_config]
-  # Duplicate code that should be DRYed up later
+def check_for_errors(options, errors)
   if options[:sec_dir].nil?
     errors << "Input secrets directory is required."
   end
@@ -64,6 +53,22 @@ if options[:create_config]
     end
     exit 1
   end
+end
+
+options = SecretsSanitizerOptions.new do |opts, options_hash, custom_messages, header|
+  opts.on("-f", "--force", "Attempt to Desanitize even if secret file(s) not present") do
+    options_hash[:force] = true
+  end
+
+  header = "Desantize will take secrets and place them into a previously sanitized environment"
+  custom_messages << "-f  --force         Desanitize files even if files with secrets do not have a matching secret files"
+end
+
+config = SanitizerConfig.new(options[:input][0], options[:sec_dir])
+
+if options[:create_config]
+  # Duplicate code that should be DRYed up later
+  check_for_errors(options, errors)
   config.create!
 elsif config.valid?
   if options[:input].empty?
@@ -74,21 +79,7 @@ elsif config.invalid? && options[:input].empty?
   puts options.display_help(1)
 end
 
-if options[:sec_dir].nil?
-  errors << "Input secrets directory is required."
-end
-
-if options[:input].empty?
-  errors << "Manifest or input directory is required."
-end
-
-
-unless errors.empty?
-  errors.each do |error|
-    $stderr.puts "ERROR: #{error}"
-  end
-  exit 1
-end
+check_for_errors(options, errors)
 
 logger = Logger.new(STDERR)
 if options[:verbose]
