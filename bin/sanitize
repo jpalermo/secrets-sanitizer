@@ -53,20 +53,7 @@ config = SanitizerConfig.new(options[:input][0], options[:sec_dir])
 
 if options[:create_config]
   # Duplicate code that should be DRYed up later
-  if options[:sec_dir].nil?
-    errors << "Input secrets directory is required."
-  end
-
-  if options[:input].empty?
-    errors << "Manifest or input directory is required."
-  end
-  unless errors.empty?
-    errors.each do |error|
-      $stderr.puts "ERROR: #{error}"
-    end
-    exit 1
-  end
-
+  options.check_for_errors!
   config.create!
 elsif config.valid?
   if options[:input].empty?
@@ -77,24 +64,9 @@ elsif config.invalid? && options[:input].empty?
   errors << "Manifest or input directory is required."
 end
 
+options[:pattern_file] = default_pattern_file if options[:pattern_file].nil?
 
-# check arguments
-
-if options[:sec_dir].nil?
-  errors << "Output secrets directory is required."
-end
-
-if options[:pattern_file].nil?
-  options[:pattern_file] = default_pattern_file
-end
-
-
-unless errors.empty?
-  errors.each do |error|
-    $stderr.puts "ERROR: #{error}"
-  end
-  exit 1
-end
+options.check_for_errors!
 
 logger = Logger.new(STDERR)
 if options[:verbose]

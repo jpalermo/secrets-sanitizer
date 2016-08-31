@@ -3,6 +3,7 @@ class SecretsSanitizerOptions
     @options = {}
     @custom_option_messages = []
     @header = ""
+    @errors = []
 
     OptionParser.new do |opts|
       @options[:input] = []
@@ -67,5 +68,22 @@ class SecretsSanitizerOptions
       puts custom_option_message
     end
     exit exitcode
+  end
+
+  def check_for_errors!
+    if @options[:sec_dir].nil?
+      @errors << "Secrets directory is required."
+    end
+
+    if @options[:input].empty?
+      @errors << "Manifest or input directory is required."
+    end
+
+    unless @errors.empty?
+      @errors.each do |error|
+        $stderr.puts "ERROR: #{error}"
+      end
+      exit 1
+    end
   end
 end
