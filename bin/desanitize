@@ -38,63 +38,14 @@ require 'desanitizer'
 require 'yaml'
 require 'logger'
 
-def help exitcode=0
-  puts "Desantize will take secrets and place them into a previously sanitized environment"
-  puts
-  puts "#{$0} [options]"
-  puts "-h, --help          Help. See this help message."
-  puts "-i, --input         Input manifest file or directory"
-  puts "-s, --secret-dir    Folder where all secrets will be read"
-  puts "-f  --force         Desanitize files even if files with secrets do not have a matching secret files"
-  puts "-c, --create-config Create the .secrets_sanitizer file in the given"
-  puts "                    input path that contains the given secrets path"
-  puts "-v, --verbose"
-  puts "-m, --manifest      [deprecated] Input manifest file"
-  puts "-d, --input-dir     [deprecated] Input Directory containing yaml with secrets"
-  exit exitcode
-end
-
-
-options = {}
-OptionParser.new do |opts|
-  options[:input] = []
-  opts.banner = "Usage: #{$0} [options]"
-
-  opts.on("-h", "--help", "Help") do
-    help
-  end
-
-  opts.on("-c", "--create-config", "Create the .secrets_sanitizer file in the given input path that contains the given secrets path") do |option|
-    options[:create_config] = true
-  end
-
-  opts.on("-iINPUT", "--input=INPUT", "Input file or directory") do |option|
-    options[:input] << option
-  end
-
-  opts.on("-sSECRETDIR", "--secret-dir=SECRETDIR", "Secret file directory") do |option|
-    options[:sec_dir] = option
-  end
-
-  opts.on("-mMANIFEST", "--manifest=MANIFEST", "Manifest yaml") do |option|
-    # options[:manifest] = option
-    options[:input] << option
-  end
-
-  opts.on("-dINPUT_DIR", "--input-dir=INPUTDIR", "Input directory of yaml files") do |option|
-    # options[:input_dir] = option
-    options[:input] << option
-  end
-
-  opts.on("-v", "--verbose") do
-    options[:verbose] = true
-  end
-
+options = SecretsSanitizerOptions.new do |opts, options_hash, custom_messages, header|
   opts.on("-f", "--force", "Attempt to Desanitize even if secret file(s) not present") do
-    options[:force] = true
+    options_hash[:force] = true
   end
-end.parse!
 
+  header = "Desantize will take secrets and place them into a previously sanitized environment"
+  custom_messages << "-f  --force         Desanitize files even if files with secrets do not have a matching secret files"
+end
 
 config = SanitizerConfig.new(options[:input][0], options[:sec_dir])
 
@@ -120,7 +71,7 @@ elsif config.valid?
     options[:input][0] = config.input_path
   end
 elsif config.invalid? && options[:input].empty?
-  help(1)
+  puts options.display_help(1)
 end
 
 if options[:sec_dir].nil?

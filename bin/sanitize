@@ -39,63 +39,15 @@ require 'yaml'
 
 default_pattern_file = File.expand_path(File.join(File.dirname(__FILE__), "../config/catchall"))
 
-def help exitcode=0
-  puts "Santize will take secrets and factor them out of a given environment, placing them into a specified secrets cache"
-  puts
-  puts "#{$0} [options]"
-  puts "-h, --help          Help. See this help message."
-  puts "-i, --input         Input manifest file or directory"
-  puts "-s, --secret-dir    Folder where all secrets will be written"
-  puts "-p, --pattern-file  (optional) Pattern file containing secrets patterns"
-  puts "                      config/catchall is used by default"
-  puts "-c, --create-config Create the .secrets_sanitizer file in the given"
-  puts "                    input path that contains the given secrets path"
-  puts "-v, --verbose"
-  puts "-m, --manifest      [deprecated] Input manifest file"
-  puts "-d, --input-dir     [deprecated] Input Directory containing yaml with secrets"
-  exit exitcode
-end
-
-options = {}
-OptionParser.new do |opts|
-  options[:input] = []
-
-  opts.banner = "Usage: #{$0} [options]"
-
-  opts.on("-h", "--help", "Help") do |h|
-    help
-  end
-
-
-  opts.on("-c", "--create-config", "Create the .secrets_sanitizer file in the given input path that contains the given secrets path") do |option|
-    options[:create_config] = true
-  end
-
-
-  opts.on("-iINPUT", "--input=INPUT", "Input file or directory") do |option|
-    options[:input] << option
-  end
-
-  opts.on("-sSECRETDIR", "--secret-dir=SECRETDIR", "Secret file directory") do |option|
-    options[:sec_dir] = option
-  end
-
+options = SecretsSanitizerOptions.new do |opts, options_hash, custom_messages, header|
   opts.on("-pPATTERNFILE", "--pattern-file=PATTERNFILE", "File with regex patterns to match secret keys") do |option|
-    options[:pattern_file] = option
+    options_hash[:pattern_file] = option
   end
 
-  opts.on("-mMANIFEST", "--manifest=MANIFEST", "Manifest yaml") do |option|
-    options[:input] << option
-  end
-
-  opts.on("-dINPUT_DIR", "--input-dir=INPUTDIR", "Input directory of yaml files") do |option|
-    options[:input] << option
-  end
-
-  opts.on("-v", "--verbose") do
-    options[:verbose] = true
-  end
-end.parse!
+  header = "Santize will take secrets and factor them out of a given environment, placing them into a specified secrets cache"
+  custom_messages << "-p, --pattern-file  (optional) Pattern file containing secrets patterns"
+  custom_messages << "                    config/catchall is used by default"
+end
 
 config = SanitizerConfig.new(options[:input][0], options[:sec_dir])
 

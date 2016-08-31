@@ -31,3 +31,4 @@ require "sanitizer/yaml_traverser"
 require "sanitizer/mustache_replacer"
 require "sanitizer/sanitize_executor"
 require "sanitizer_config"
+require 'secrets_sanitizer_options'
