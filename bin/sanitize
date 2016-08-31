@@ -114,6 +114,7 @@ if options[:create_config]
     end
     exit 1
   end
+
   config.create!
 elsif config.valid?
   if options[:input].empty?
@@ -121,7 +122,7 @@ elsif config.valid?
     options[:input][0] = config.input_path
   end
 elsif config.invalid? && options[:input].empty?
-  help(1)
+  errors << "Manifest or input directory is required."
 end
 
 
@@ -135,9 +136,6 @@ if options[:pattern_file].nil?
   options[:pattern_file] = default_pattern_file
 end
 
-if options[:input].empty?
-  errors << "Manifest or input directory is required."
-end
 
 unless errors.empty?
   errors.each do |error|

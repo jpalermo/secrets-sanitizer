@@ -72,7 +72,7 @@ describe Sanitizer do
     end
   end
 
-  xit 'exit with error when manifest and input_dir are not specified' do
+  it 'exit with error when manifest and input_dir are not specified' do
     output = `#{sanitizer_executable} -s #{tmp_dir}  2>&1`
     expect(output).to match(/Manifest or input directory is required/)
   end
@@ -163,12 +163,6 @@ describe Sanitizer do
   end
 
   context "when a .secrets_sanitizer config file doesn't exist" do
-    context "if no arguments are given" do
-      it 'shows help' do
-        stdout, _, _ = Open3.capture3(sanitizer_executable)
-        expect(stdout).to match(/-h, --help/)
-      end
-    end
 
     context "if --create-config argument is given with other correct input" do
       it "creates a .secrets_sanitizer file" do
