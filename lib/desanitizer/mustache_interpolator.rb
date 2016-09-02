@@ -38,27 +38,45 @@ module Desanitizer
     end
 
     def interpolate(name, value, hierarchy)
-      path = hierarchy.join('_')
+      secret_key = secret_key_from(value)
 
+      return unless secret_key
+      exit 1 unless secret_key_exists?(secret_key)
+
+      focused_hash = reduce_search_field(hierarchy)
+
+      key_to_set = hierarchy.last
+      focused_hash[key_to_set] = @secrets.fetch(secret_key)
+    end
+
+    def manifest_yaml
+      YAML.dump(@yaml, options = {:line_width => -1})
+    end
+
+    private
+
+    def secret_key_from(value)
       match = value.to_s.match(/\{\{\s*([^\s\}]+)\s*\}\}/)
       return if match.nil?
-      key = match[1]
+      secret_key = match[1]
+    end
 
+    def secret_key_exists?(secret_key)
+      unless @secrets.has_key?(secret_key)
+        @logger.error "\e[31m Missing value #{hierarchy.join('_')}: #{value} \e[0m "
+        exit 1
+      end
+
+      true
+    end
+
+    def reduce_search_field(hierarchy)
       focus = @yaml
       (0 .. hierarchy.size - 2).each do |depth|
         focus = focus.fetch(hierarchy[depth])
       end
 
-      unless @secrets.has_key?(key)
-        @logger.error "\e[31m Missing value  #{path}: #{value} \e[0m "
-        exit 1
-      end
-
-      focus[hierarchy[-1]] = @secrets.fetch(key)
-    end
-
-    def manifest_yaml
-      YAML.dump(@yaml, options = {:line_width => -1})
+      focus
     end
   end
 end
