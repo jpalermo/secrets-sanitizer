@@ -51,7 +51,7 @@ module Sanitizer
           end
 
           @secrets[path] = value
-          focus[hierarchy[-1]] = "{{#{path}}}" #replace with mustache syntax like '{{ properties_aws_key }}'
+          focus[hierarchy.last] = "{{#{path}}}" #replace with mustache syntax like '{{ properties_aws_key }}'
         end
       end
     end
