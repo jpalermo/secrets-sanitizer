@@ -4,3 +4,6 @@ bla:
     bar_secret_key_array:
     - bar_secret_value_0
     - bar_secret_value_1
+    totally_normal_array:
+    - bar_normal_value_0
+    - bar_normal_value_1

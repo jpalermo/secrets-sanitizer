@@ -105,13 +105,13 @@ describe Sanitizer::SanitizeExecutor do
   context "when given a file with an array" do
     let(:original_file) { "#{tmp_dir}/manifest_with_array.yml" }
 
-    it 'replaces secret array values' do
+    it 'replaces secret array values and leaves non-secret array values as found' do
       Sanitizer::SanitizeExecutor.execute(original_file, default_config_path, tmp_dir)
       sanitized_yml = File.read(File.expand_path("#{tmp_dir}/sanitized_manifest_with_array.yml"))
       expected_yml  = File.read(File.expand_path(original_file))
       expect(expected_yml).to eq(sanitized_yml)
     end
 
-    context "when the array doesn't have a secret"
+
   end
 end
