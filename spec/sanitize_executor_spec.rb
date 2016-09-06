@@ -101,17 +101,4 @@ describe Sanitizer::SanitizeExecutor do
 
     expect(compare_yml("#{tmp_dir}/secrets-manifest_1.json", "#{fixture_dir}/secrets-manifest_1_with_existing_secrets.json")).to be_truthy
   end
-
-  context "when given a file with an array" do
-    let(:original_file) { "#{tmp_dir}/manifest_with_array.yml" }
-
-    it 'replaces secret array values and leaves non-secret array values as found' do
-      Sanitizer::SanitizeExecutor.execute(original_file, default_config_path, tmp_dir)
-      sanitized_yml = File.read(File.expand_path("#{tmp_dir}/sanitized_manifest_with_array.yml"))
-      expected_yml  = File.read(File.expand_path(original_file))
-      expect(expected_yml).to eq(sanitized_yml)
-    end
-
-
-  end
 end
