@@ -41,7 +41,7 @@ module Desanitizer
       secret_key = secret_key_from(value)
 
       return unless secret_key
-      secret_key_exists?(secret_key)
+      secret_key_exists?(secret_key, hierarchy, value)
 
       focused_hash = reduce_search_field(hierarchy)
 
@@ -61,7 +61,7 @@ module Desanitizer
       secret_key = match[1]
     end
 
-    def secret_key_exists?(secret_key)
+    def secret_key_exists?(secret_key, hierarchy, value)
       unless @secrets.has_key?(secret_key)
         @logger.error "\e[31m Missing value #{hierarchy.join('_')}: #{value} \e[0m "
         exit 1
