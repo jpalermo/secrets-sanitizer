@@ -41,7 +41,7 @@ module Desanitizer
       secret_key = secret_key_from(value)
 
       return unless secret_key
-      exit 1 unless secret_key_exists?(secret_key)
+      secret_key_exists?(secret_key)
 
       focused_hash = reduce_search_field(hierarchy)
 
