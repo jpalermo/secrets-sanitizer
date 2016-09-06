@@ -9,7 +9,11 @@ module Sanitizer
           if v.is_a?(Hash)
             #noop
           elsif v.is_a?(Array)
-            #noop
+            v.each_with_index do | this_array_value, this_array_index |
+              array_hierarchy = h.clone
+              array_hierarchy << this_array_index
+              blk.call(k, this_array_value, array_hierarchy)
+            end
           else
             blk.call(k,v, h)
           end
