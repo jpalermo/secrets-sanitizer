@@ -1,4 +1,6 @@
+---
 bla:
   foo:
     bar_secret_key_array:
-    - {{bla_foo_bar_secret_key}}
+    - "{{bla_foo_bar_secret_key_array_0}}"
+    - "{{bla_foo_bar_secret_key_array_1}}"

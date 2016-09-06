@@ -44,7 +44,7 @@ describe Sanitizer::YamlTraverser do
     expect(traversed_nodes.keys).to include('bar2')
 
     expect(traversed_nodes.keys).not_to include('test1')
-    expect(traversed_nodes.keys).not_to include('bla1')
+    expect(traversed_nodes.keys).to include('bla1')
     expect(traversed_nodes.keys).to include('SECRET_KEY')
     expect(traversed_nodes.keys).to include('foo1')
 
