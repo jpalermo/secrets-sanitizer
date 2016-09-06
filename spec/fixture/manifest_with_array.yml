@@ -2,4 +2,5 @@
 bla:
   foo:
     bar_secret_key_array:
-    - bar_secret_value
+    - bar_secret_value_0
+    - bar_secret_value_1
