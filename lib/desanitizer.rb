@@ -26,7 +26,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require "desanitizer/version"
 require "desanitizer/mustache_interpolator"
 require "desanitizer/desanitize_executor"
 require "sanitizer_config"
