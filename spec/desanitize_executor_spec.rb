@@ -73,15 +73,13 @@ describe Desanitizer::DesanitizeExecutor do
     end
   end
 
+  context "when given a multiline file" do
+    let(:original_file) { "#{tmp_dir}/sanitized_manifest_multiline.yml" }
 
-
-    context "when given a multiline file" do
-      let(:original_file) { "#{tmp_dir}/sanitized_manifest_multiline.yml" }
-
-      it 'replaces mustache keys with the multiline values from secrets file' do
-        Desanitizer::DesanitizeExecutor.execute(original_file, tmp_dir)
-        ymls_are_the_same = compare_yml("#{tmp_dir}/manifest_multiline.yml", "#{fixture_dir}/manifest_multiline.yml")
-        expect(ymls_are_the_same).to be_truthy
-      end
+    it 'replaces mustache keys with the multiline values from secrets file' do
+      Desanitizer::DesanitizeExecutor.execute(original_file, tmp_dir)
+      ymls_are_the_same = compare_yml("#{tmp_dir}/manifest_multiline.yml", "#{fixture_dir}/manifest_multiline.yml")
+      expect(ymls_are_the_same).to be_truthy
     end
   end
+end
