@@ -53,16 +53,6 @@ class SecretsSanitizerOptions
         @options[:sec_dir] = option
       end
 
-      opts.on("-mMANIFEST", "--manifest=MANIFEST", "Manifest yaml") do |option|
-        # @options[:manifest] = option
-        @options[:input] << option
-      end
-
-      opts.on("-dINPUT_DIR", "--input-dir=INPUTDIR", "Input directory of yaml files") do |option|
-        # @options[:input_dir] = option
-        @options[:input] << option
-      end
-
       opts.on("-v", "--verbose") do
         @options[:verbose] = true
       end
@@ -90,8 +80,6 @@ class SecretsSanitizerOptions
     puts "-c, --create-config Create the .secrets_sanitizer file in the given"
     puts "                    input path that contains the given secrets path"
     puts "-v, --verbose"
-    puts "-m, --manifest      [deprecated] Input manifest file"
-    puts "-d, --input-dir     [deprecated] Input Directory containing yaml with secrets"
     @custom_option_messages.each do |custom_option_message|
       puts custom_option_message
     end
