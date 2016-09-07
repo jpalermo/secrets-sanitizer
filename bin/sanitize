@@ -51,10 +51,24 @@ end
 
 config = SanitizerConfig.new(options[:input][0], options[:sec_dir])
 
+logger = Logger.new(STDERR)
+if options[:verbose]
+  logger.level = Logger::DEBUG
+else
+  logger.level = Logger::ERROR
+end
+
+
 if options[:create_config]
   # Duplicate code that should be DRYed up later
   options.check_for_errors!
-  config.create!
+
+  begin
+    config.create!
+  rescue Errno::ENOENT, Errno::ENOTDIR
+    logger.error("A config file will only be created if a directory is given as input. Please run this command again without the --create-config or -c option or use a directory as input.")
+    exit 1
+  end
 elsif config.valid?
   if options[:input].empty?
     options[:sec_dir]  = config.secrets_path
@@ -67,13 +81,6 @@ end
 options[:pattern_file] = default_pattern_file if options[:pattern_file].nil?
 
 options.check_for_errors!
-
-logger = Logger.new(STDERR)
-if options[:verbose]
-  logger.level = Logger::DEBUG
-else
-  logger.level = Logger::ERROR
-end
 
 
 

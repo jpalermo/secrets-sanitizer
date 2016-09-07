@@ -1,0 +1,53 @@
+# Copyright (C) 2016-Present Pivotal Software, Inc. All rights reserved.
+#
+# This program and the accompanying materials are made available under
+# the terms of the under the Apache License, Version 2.0 (the "License”);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.Copyright (C) 2016-Present Pivotal Software, Inc. # All rights reserved.
+#
+# This program and the accompanying materials are made available under
+# the terms of the under the Apache License, Version 2.0 (the "License”);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+require 'spec_helper'
+
+describe SanitizerConfig do
+  let(:work_dir) { File.dirname(__FILE__) }
+  let(:fixture_dir) { "#{work_dir}/fixture" }
+  let(:tmp_dir) { Dir.mktmpdir }
+
+  before do
+    FileUtils.cp_r Dir.glob("#{fixture_dir}/*"), "#{tmp_dir}/"
+  end
+
+  after do
+    FileUtils.rm_r tmp_dir
+  end
+
+  describe "#create!" do
+    context "when a file is given instead of a directory" do
+      let(:config) { SanitizerConfig.new("#{tmp_dir}/manifest_1.yml", "#{tmp_dir}") }
+
+      it "raises an appropriate error" do
+        expect{ config.create! }.to raise_error(Errno::ENOTDIR)
+      end
+    end
+  end
+end

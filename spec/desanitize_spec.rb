@@ -187,8 +187,16 @@ describe "Desanitizer executable" do
       end
     end
 
-    context "when --create-config argument is given without correct input" do
-      it 'exits with a handy error message'
+    context "when --create-config argument is given with a single file as input" do
+      it "displays an message that a config file won't be created" do
+        _, stderr, _ = Open3.capture3("#{desanitizer_executable} --verbose --create-config -i #{tmp_dir}/manifest_1.yml -s #{tmp_dir}")
+        expect(stderr).to match(/A config file will only be created if a directory is given as input./)
+      end
+
+      it "exits with status 1" do
+        _, _, status = Open3.capture3("#{desanitizer_executable} --verbose --create-config -i #{tmp_dir}/manifest_1.yml -s #{tmp_dir}")
+        expect(status.exitstatus).to eq(1)
+      end
     end
   end
 
