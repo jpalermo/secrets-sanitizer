@@ -101,7 +101,6 @@ describe "Desanitizer executable" do
 
   context "when a .secrets_sanitizer config file exists" do
     let(:secrets_dir) { tmp_dir }
-    let(:literally_anything) { anything }
 
     it 'desanitizes a file listed in the config' do
       file = File.open("#{tmp_dir}/.secrets_sanitizer", "w+") { |f|

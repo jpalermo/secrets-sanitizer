@@ -1,0 +1,14 @@
+---
+resource_pools:
+- name: default
+  stemcell:
+    name: bosh-aws-xen-ubuntu-trusty-go_agent
+    url: https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent?v=3232.8
+    sha1: e2283bc53ccd86627910830d50f84ac2b69b49db
+  network: default
+  cloud_properties:
+    instance_type: m3.large
+    availability_zone: us-east-1d
+  env:
+    bosh:
+      password: MY PASSWORD IS SO SECURE

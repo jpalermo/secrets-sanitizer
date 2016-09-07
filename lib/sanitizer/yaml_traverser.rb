@@ -12,7 +12,12 @@ module Sanitizer
             v.each_with_index do | this_array_value, this_array_index |
               array_hierarchy = h.clone
               array_hierarchy << this_array_index
-              blk.call(k, this_array_value, array_hierarchy)
+
+              if(this_array_value.is_a?(String))
+                blk.call(k, this_array_value, array_hierarchy)
+              else
+                traverse(hash[this_array_index], array_hierarchy, &blk)
+              end
             end
           else
             blk.call(k,v, h)
