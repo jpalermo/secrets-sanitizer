@@ -92,7 +92,10 @@ end
 if File.file?(options[:input][0])
   # it's a file!
   logger.warn "Sanitizing file #{options[:input][0]}..."
-  Sanitizer::SanitizeExecutor.execute(options[:input][0], options[:pattern_file], options[:sec_dir], logger)
+  Sanitizer::SanitizeExecutor.execute(manifest_path: options[:input][0],
+                                      pattern_file: options[:pattern_file],
+                                      secrets_path: options[:sec_dir],
+                                      logger: logger)
 else
   # do directory
   Dir.glob(File.join(options[:input][0], '**', '*.yml')) do |this_file|
@@ -100,7 +103,10 @@ else
       logger.warn "Skipping file #{this_file} because symlinks are skipped in directory mode"
     else
       logger.warn "Sanitizing file #{this_file}..."
-      Sanitizer::SanitizeExecutor.execute(this_file, options[:pattern_file], options[:sec_dir], logger)
+      Sanitizer::SanitizeExecutor.execute(manifest_path: this_file,
+                                          pattern_file: options[:pattern_file],
+                                          secrets_path: options[:sec_dir],
+                                          logger: logger)
     end
   end
 end

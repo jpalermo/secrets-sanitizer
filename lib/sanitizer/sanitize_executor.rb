@@ -2,7 +2,12 @@ require 'logger'
 
 module Sanitizer
   class SanitizeExecutor
-    def self.execute(manifest_path, pattern_file, secrets_path, logger = Logger.new(STDERR))
+    def self.execute(
+      manifest_path: manifest_path,
+      pattern_file: pattern_file,
+      secrets_path: secrets_path,
+      logger: Logger.new(STDERR)
+    )
 
       manifest = YAML.load_file(manifest_path)
 

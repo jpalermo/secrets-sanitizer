@@ -45,46 +45,65 @@ describe Sanitizer::SanitizeExecutor do
 
   it 'extracts secrets to another file' do
     FileUtils.rm("#{tmp_dir}/secrets-manifest_1.json")
-    Sanitizer::SanitizeExecutor.execute("#{tmp_dir}/manifest_1.yml", default_config_path, tmp_dir)
+    Sanitizer::SanitizeExecutor.execute(manifest_path: "#{tmp_dir}/manifest_1.yml",
+                                        pattern_file: default_config_path,
+                                        secrets_path: tmp_dir)
     expect { File.open("#{tmp_dir}/secrets-manifest_1.json") }.to_not raise_error
   end
 
   it 'adds \'"{{\' to the sanitized file' do
-    Sanitizer::SanitizeExecutor.execute("#{tmp_dir}/manifest_1.yml", default_config_path, tmp_dir)
+    Sanitizer::SanitizeExecutor.execute(manifest_path: "#{tmp_dir}/manifest_1.yml",
+                                        pattern_file: default_config_path,
+                                        secrets_path: tmp_dir)
     expect(File.open("#{tmp_dir}/manifest_1.yml").grep(/\"\{\{/)).to_not be_empty
   end
 
   it 'works with multiple line value keys' do
-    Sanitizer::SanitizeExecutor.execute("#{tmp_dir}/manifest_multiline.yml",  default_config_path, tmp_dir)
+    Sanitizer::SanitizeExecutor.execute(manifest_path: "#{tmp_dir}/manifest_multiline.yml",
+                                        pattern_file: default_config_path,
+                                        secrets_path: tmp_dir)
     expect(compare_yml("#{tmp_dir}/manifest_multiline.yml", "#{fixture_dir}/sanitized_manifest_multiline.yml")).to be_truthy
   end
 
   it 'works with multiple line value keys' do
-    Sanitizer::SanitizeExecutor.execute("#{tmp_dir}/manifest_4.yml",  default_config_path, tmp_dir)
+    Sanitizer::SanitizeExecutor.execute(manifest_path: "#{tmp_dir}/manifest_4.yml",
+                                        pattern_file: default_config_path,
+                                        secrets_path: tmp_dir)
     expect(compare_yml("#{tmp_dir}/manifest_4.yml", "#{fixture_dir}/sanitized_manifest_4.yml")).to be_truthy
   end
 
   it 'does not create secret file if no secrets matched the pattern' do
-    Sanitizer::SanitizeExecutor.execute("#{tmp_dir}/non_matching_secret_manifest.yml",  default_config_path, tmp_dir)
+    Sanitizer::SanitizeExecutor.execute(manifest_path: "#{tmp_dir}/non_matching_secret_manifest.yml",
+                                        pattern_file: default_config_path,
+                                        secrets_path: tmp_dir)
     expect(File).to_not exist("#{tmp_dir}/secrets-non_matching_secret_manifest.json")
   end
 
   it 'ignores values already in mustache syntax' do
-    Sanitizer::SanitizeExecutor.execute("#{tmp_dir}/manifest_5.yml",  default_config_path, tmp_dir, Logger.new(nil))
+    Sanitizer::SanitizeExecutor.execute(manifest_path: "#{tmp_dir}/manifest_5.yml",
+                                        pattern_file: default_config_path,
+                                        secrets_path: tmp_dir,
+                                        logger: Logger.new(nil))
     manifest_post_sanitize = YAML.load_file("#{tmp_dir}/manifest_5.yml")
     mustache_value_key = manifest_post_sanitize['bla']['foo']['bar_secret_key']
     expect(mustache_value_key).to eq("{{bar_secret_value}}")
   end
 
   it 'ignores null or empty values for matching keys' do
-    Sanitizer::SanitizeExecutor.execute("#{tmp_dir}/manifest_6.yml",  default_config_path, tmp_dir, Logger.new(nil))
+    Sanitizer::SanitizeExecutor.execute(manifest_path: "#{tmp_dir}/manifest_6.yml",
+                                        pattern_file: default_config_path,
+                                        secrets_path: tmp_dir,
+                                        logger: Logger.new(nil))
     manifest_post_sanitize = YAML.load_file("#{tmp_dir}/manifest_6.yml")
     mustache_value_key = manifest_post_sanitize['bla']['foo']['bar_secret_key']
     expect(mustache_value_key).to eq("{{bla_foo_bar_secret_key}}")
   end
 
   it 'ignores values already in spiff syntax' do
-    Sanitizer::SanitizeExecutor.execute("#{tmp_dir}/manifest_7.yml",  default_config_path, tmp_dir, Logger.new(nil))
+    Sanitizer::SanitizeExecutor.execute(manifest_path: "#{tmp_dir}/manifest_7.yml",
+                                        pattern_file: default_config_path,
+                                        secrets_path: tmp_dir,
+                                        logger: Logger.new(nil))
     manifest_post_sanitize = YAML.load_file("#{tmp_dir}/manifest_7.yml")
     mustache_value_key = manifest_post_sanitize['bla']['foo']['bar_secret_key']
     expect(mustache_value_key).to eq("((bar_secret_value))")
@@ -97,7 +116,10 @@ describe Sanitizer::SanitizeExecutor do
       file.write existing_secrets.to_json
     end
 
-    Sanitizer::SanitizeExecutor.execute("#{tmp_dir}/manifest_1.yml", default_config_path, tmp_dir)
+    Sanitizer::SanitizeExecutor.execute(manifest_path: "#{tmp_dir}/manifest_1.yml",
+                                        pattern_file: default_config_path,
+                                        secrets_path: tmp_dir,
+                                        logger: Logger.new(nil))
 
     expect(compare_yml("#{tmp_dir}/secrets-manifest_1.json", "#{fixture_dir}/secrets-manifest_1_with_existing_secrets.json")).to be_truthy
   end
@@ -106,7 +128,10 @@ describe Sanitizer::SanitizeExecutor do
     let(:original_file) { "#{tmp_dir}/manifest_with_array.yml" }
 
     it 'replaces secret array values and leaves non-secret array values as found' do
-      Sanitizer::SanitizeExecutor.execute(original_file, default_config_path, tmp_dir)
+      Sanitizer::SanitizeExecutor.execute(manifest_path: original_file,
+                                          pattern_file: default_config_path,
+                                          secrets_path: tmp_dir,
+                                          logger: Logger.new(nil))
       sanitized_yml = File.read(File.expand_path("#{tmp_dir}/sanitized_manifest_with_array.yml"))
       expected_yml  = File.read(File.expand_path(original_file))
       expect(expected_yml).to eq(sanitized_yml)
