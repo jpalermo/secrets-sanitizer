@@ -46,7 +46,7 @@ describe Desanitizer::DesanitizeExecutor do
     let(:original_file) { "#{tmp_dir}/sanitized_manifest_1.yml" }
 
     it 'replaces mustache keys with the values from secrets file' do
-      Desanitizer::DesanitizeExecutor.execute(original_file, tmp_dir)
+      Desanitizer::DesanitizeExecutor.execute(manifest_path: original_file, secrets_path: tmp_dir)
       ymls_are_the_same = compare_yml(original_file, "#{tmp_dir}/manifest_1.yml")
       expect(ymls_are_the_same).to be_truthy
     end
@@ -56,7 +56,7 @@ describe Desanitizer::DesanitizeExecutor do
     let(:original_file) { "#{tmp_dir}/sanitized_manifest_with_array.yml" }
 
     it 'replaces mustache keys inside arrays with the values from secrets file' do
-      Desanitizer::DesanitizeExecutor.execute(original_file, tmp_dir)
+      Desanitizer::DesanitizeExecutor.execute(manifest_path: original_file, secrets_path: tmp_dir)
       desanitized_yml = File.read(File.expand_path("#{tmp_dir}/manifest_with_array.yml"))
       expected_yml  = File.read(File.expand_path(original_file))
       expect(expected_yml).to eq(desanitized_yml)
@@ -66,7 +66,7 @@ describe Desanitizer::DesanitizeExecutor do
       let(:sanitized_file) { "#{tmp_dir}/sanitized_manifest_with_array_and_sub_hash.yml" }
 
       it "replaces string values, as opposed to the entire hash" do
-        Desanitizer::DesanitizeExecutor.execute(sanitized_file, tmp_dir)
+        Desanitizer::DesanitizeExecutor.execute(manifest_path: sanitized_file, secrets_path: tmp_dir)
         ymls_are_the_same = compare_yml(sanitized_file, "#{fixture_dir}/manifest_with_array_and_sub_hash.yml")
         expect(ymls_are_the_same).to be_truthy
       end
@@ -77,7 +77,7 @@ describe Desanitizer::DesanitizeExecutor do
     let(:original_file) { "#{tmp_dir}/sanitized_manifest_multiline.yml" }
 
     it 'replaces mustache keys with the multiline values from secrets file' do
-      Desanitizer::DesanitizeExecutor.execute(original_file, tmp_dir)
+      Desanitizer::DesanitizeExecutor.execute(manifest_path: original_file, secrets_path: tmp_dir)
       ymls_are_the_same = compare_yml("#{tmp_dir}/manifest_multiline.yml", "#{fixture_dir}/manifest_multiline.yml")
       expect(ymls_are_the_same).to be_truthy
     end

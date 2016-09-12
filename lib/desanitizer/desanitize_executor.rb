@@ -31,7 +31,7 @@ require 'sanitizer'
 
 module Desanitizer
   class DesanitizeExecutor
-    def self.execute(manifest_path, secrets_path, logger = Logger.new(STDERR), force_enabled = false)
+    def self.execute(manifest_path: nil, secrets_path: nil, logger: Logger.new(STDERR), force_enabled: false)
 
       @manifest = YAML.load_file(manifest_path)
 

@@ -87,7 +87,11 @@ end
 if File.file?(options[:input][0])
   # it's a file!
   logger.warn "Desanitizing file #{options[:input][0]}..."
-  Desanitizer::DesanitizeExecutor.execute(options[:input][0], options[:sec_dir], logger, options[:force])
+  Desanitizer::DesanitizeExecutor.execute(manifest_path: options[:input][0],
+                                          secrets_path: options[:sec_dir],
+                                          logger: logger,
+                                          force_enabled: options[:force])
+
 elsif File.directory?(options[:input][0])
   # do directory
   Dir.glob(File.join(options[:input][0], '**', '*.yml')) do |this_file|
@@ -95,7 +99,10 @@ elsif File.directory?(options[:input][0])
       logger.warn "Skipping file #{this_file} because symlinks are skipped in directory mode"
     else
       logger.warn "Desanitizing file #{this_file}..."
-      Desanitizer::DesanitizeExecutor.execute(this_file, options[:sec_dir], logger, options[:force])
+      Desanitizer::DesanitizeExecutor.execute(manifest_path: this_file,
+                                              secrets_path: options[:sec_dir],
+                                              logger: logger,
+                                              force_enabled: options[:force])
     end
   end
 else
