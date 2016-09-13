@@ -18,7 +18,7 @@ class SanitizerConfig
   end
 
   def config_file_path
-    config_file.path
+    config_file.path if config_file
   end
 
   def config_file
