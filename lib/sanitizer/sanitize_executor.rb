@@ -3,9 +3,9 @@ require 'logger'
 module Sanitizer
   class SanitizeExecutor
     def self.execute(
-      manifest_path: manifest_path,
-      pattern_file: pattern_file,
-      secrets_path: secrets_path,
+      manifest_path: nil,
+      pattern_file: nil,
+      secrets_path: nil,
       logger: Logger.new(STDERR)
     )
 
