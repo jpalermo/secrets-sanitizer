@@ -190,10 +190,9 @@ describe SanitizerConfig do
 
       context "when the given config file has multiple lines" do
         before do
-          File.open("#{tmp_dir}/.secrets_sanitizer", "w+") do |file|
-            file.puts secrets_dir
-            file.puts secrets_dir
-          end
+          file = create_valid_config_file
+          file.puts secrets_dir
+          file.close
         end
 
         it "raises an exception" do
@@ -204,23 +203,32 @@ describe SanitizerConfig do
       end
 
       context "when the given config file is valid" do
-        it "ignores comments" do
-          file = create_valid_config_file
-          file.puts "# This file stores the location of the hellmouth"
-          file.close
+        context "when given a file with comments" do
+          before do
+            file = create_valid_config_file
+            file.puts "# This file stores the location of the hellmouth"
+            file.close
+          end
 
-          expect(config.config_contents).to include(secrets_dir)
-          expect(config.config_contents).to_not include(/This file stores/)
+          it "ignores comments" do
+            expect(config.config_contents).to include(secrets_dir)
+            expect(config.config_contents).to_not include(/This file stores/)
+          end
         end
 
-        it "ignores empty lines" do
-          file = create_valid_config_file
-          file.puts ""
-          file.close
+        context "when given a file with empty lines" do
+          before do
+            file = create_valid_config_file
+            file.puts ""
+            file.close
+          end
 
-          expect(config.config_contents).to include(secrets_dir)
-          expect(config.config_contents).to_not include(/^\n$/)
+          it "ignores empty lines" do
+            expect(config.config_contents).to include(secrets_dir)
+            expect(config.config_contents).to_not include(/^\n$/)
+          end
         end
+
 
         it "returns the contents of the config file" do
           create_valid_config_file
