@@ -33,13 +33,9 @@ class SecretsSanitizerOptions
     @header = ""
     @errors = []
 
-    OptionParser.new do |opts|
+    @parser = OptionParser.new do |opts|
       @options[:input] = []
       opts.banner = "Usage: #{$0} [options]"
-
-      opts.on("-h", "--help", "Help") do
-        self.display_help
-      end
 
       opts.on("-c", "--create-config", "Create the .secrets_sanitizer file in the given input path that contains the given secrets path") do |option|
         @options[:create_config] = true
@@ -57,9 +53,14 @@ class SecretsSanitizerOptions
         @options[:verbose] = true
       end
 
-      yield(opts, @options, @custom_option_messages, @header) if block_given?
-    end.parse!
+      opts.on("-h", "--help", "Help") do
+        display_help
+      end
 
+      yield(opts, @options, @custom_option_messages, @header) if block_given?
+    end
+
+    @parser.parse!
   end
 
   def []=(key, value)
@@ -71,18 +72,7 @@ class SecretsSanitizerOptions
   end
 
   def display_help(exitcode=0)
-    puts @header
-    puts
-    puts "#{$0} [options]"
-    puts "-h, --help          Help. See this help message."
-    puts "-i, --input         Input manifest file or directory"
-    puts "-s, --secret-dir    Folder where all secrets will be read"
-    puts "-c, --create-config Create the .secrets_sanitizer file in the given"
-    puts "                    input path that contains the given secrets path"
-    puts "-v, --verbose"
-    @custom_option_messages.each do |custom_option_message|
-      puts custom_option_message
-    end
+    puts @parser.help
     exit exitcode
   end
 
