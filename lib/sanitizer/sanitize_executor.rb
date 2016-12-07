@@ -6,7 +6,8 @@ module Sanitizer
       manifest_path: nil,
       pattern_file: nil,
       secrets_path: nil,
-      logger: Logger.new(STDERR)
+      logger: Logger.new(STDERR),
+      &block
     )
 
       manifest = YAML.load_file(manifest_path)
@@ -29,7 +30,11 @@ module Sanitizer
       replacer = Sanitizer::MustacheReplacer.new(config_pattern, manifest, existing_secrets, logger)
 
       Sanitizer::YamlTraverser.traverse(manifest) do |k, v, hierarchy|
-        replacer.replace(k, v, hierarchy)
+        unless block_given?
+          replacer.replace(k, v, hierarchy)
+        else
+          replacer.replace(k, v, hierarchy, &block)
+        end
       end
 
       File.open(manifest_path, 'w') do |file|

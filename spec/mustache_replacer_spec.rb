@@ -68,4 +68,26 @@ describe Sanitizer::MustacheReplacer do
     expect(replacer.manifest_yaml).to eql("---\nspiff_key: \"(( spiff_value ))\"\n")
 
   end
+
+  describe 'iterator on replace' do
+    it 'should expose the current value and path' do
+      observed_value = nil
+      observed_path = nil
+      replacer = Sanitizer::MustacheReplacer.new(patterns, sanitize_hash, {}, Logger.new(nil))
+      replacer.replace('some_key', 'some_value', ['some_key']) do |value, path|
+        observed_value = value
+        observed_path = path
+      end
+      expect(observed_value).to eq('some_value')
+      expect(observed_path).to eq('some_key')
+    end
+
+    it 'should replace using the value returned from the iterator' do
+      replacer = Sanitizer::MustacheReplacer.new(patterns, sanitize_hash, {}, Logger.new(nil))
+      replacer.replace('some_key', 'some_value', ['some_key']) do |_, path|
+        "((#{path}))"
+      end
+      expect(replacer.manifest_yaml).to eql("---\nsome_key: \"((some_key))\"\n")
+    end
+  end
 end

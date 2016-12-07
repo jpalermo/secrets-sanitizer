@@ -118,4 +118,24 @@ describe Sanitizer::SanitizeExecutor do
 
 
   end
+
+  context 'when given a block' do
+    it 'should expose access to each value being replaced and its path' do
+      FileUtils.rm("#{tmp_dir}/secrets-manifest_1.json")
+
+      observed_values = []
+      observed_paths  = []
+      Sanitizer::SanitizeExecutor.execute(manifest_path: "#{tmp_dir}/manifest_1.yml",
+                                          pattern_file: default_config_path,
+                                          secrets_path: tmp_dir,
+                                          logger: Logger.new(nil)) do |value, path|
+        observed_values << value
+        observed_paths  << path
+      end
+      expect(observed_values).to include('bar_secret_value')
+      expect(observed_paths).to include('bla_foo_bar_secret_key')
+    end
+  end
+
+
 end
