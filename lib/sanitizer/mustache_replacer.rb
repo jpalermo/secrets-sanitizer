@@ -36,7 +36,12 @@ module Sanitizer
           end
 
           @secrets[path] = value
-          focus[hierarchy.last] = "{{#{path}}}" #replace with mustache syntax like '{{ properties_aws_key }}'
+          if block_given?
+            override_path = yield(value, path)
+            focus[hierarchy.last] = override_path
+          else
+            focus[hierarchy.last] = "{{#{path}}}" # replace with mustache syntax like '{{ properties_aws_key }}'
+          end
         end
       end
     end
