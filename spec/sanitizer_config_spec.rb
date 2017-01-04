@@ -61,7 +61,7 @@ describe SanitizerConfig do
     end
 
     context "when a file is given instead of a directory" do
-      let(:config) { SanitizerConfig.new("#{tmp_dir}/manifest_1.yml", "#{tmp_dir}") }
+      let(:config) { SanitizerConfig.new("#{tmp_dir}/manifest_with_simple_values.yml", "#{tmp_dir}") }
 
       it "raises an appropriate error" do
         expect{ config.create! }.to raise_error(Errno::ENOTDIR)

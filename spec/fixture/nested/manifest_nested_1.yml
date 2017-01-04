@@ -1,7 +1,0 @@
----
-bla:
-  foo:
-    bar_secret_key: bar_secret_value
-    bar_secret_key_3: bar_secret_value_3
-    bar_not_secret_key: bar_not_secret_value
- 

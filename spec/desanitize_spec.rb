@@ -64,19 +64,19 @@ describe "Desanitizer executable" do
     end
 
     it 'handles the --force option by desanitizing files that it can' do
-      FileUtils.cp "#{work_dir}/fixture/manifest_1.yml", "#{tmp_dir}/"
+      FileUtils.cp "#{work_dir}/fixture/manifest_with_simple_values.yml", "#{tmp_dir}/"
       stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir} -i #{tmp_dir} --force")
 
-      expect(compare_yml("#{tmp_dir}/sanitized_manifest_1.yml",
-        "#{tmp_dir}/manifest_1.yml")).to be_truthy
+      expect(compare_yml("#{tmp_dir}/sanitized_manifest_with_simple_values.yml",
+        "#{tmp_dir}/manifest_with_simple_values.yml")).to be_truthy
     end
   end
 
   it 'skips symlink files when passed a directory as input' do
     Dir.mkdir("#{tmp_dir}/symlinktest")
-    FileUtils.cp "#{tmp_dir}/sanitized_manifest_1.yml", "#{tmp_dir}/symlinktest"
-    FileUtils.cp "#{tmp_dir}/secrets-sanitized_manifest_1.json", "#{tmp_dir}/symlinktest"
-    FileUtils.ln_s "#{tmp_dir}/symlinktest/manifest_1.yml", "#{tmp_dir}/symlinktest/symlink.yml"
+    FileUtils.cp "#{tmp_dir}/sanitized_manifest_with_simple_values.yml", "#{tmp_dir}/symlinktest"
+    FileUtils.cp "#{tmp_dir}/secrets-sanitized_manifest_with_simple_values.json", "#{tmp_dir}/symlinktest"
+    FileUtils.ln_s "#{tmp_dir}/symlinktest/manifest_with_simple_values.yml", "#{tmp_dir}/symlinktest/symlink.yml"
 
     stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir}/symlinktest -i #{tmp_dir}/symlinktest --verbose")
     expect(stdout).to eq("")
@@ -86,14 +86,14 @@ describe "Desanitizer executable" do
 
   it 'process the symlinked file when passed as a single argument' do
     Dir.mkdir("#{tmp_dir}/symlinktest")
-    FileUtils.mv "#{tmp_dir}/sanitized_manifest_1.yml", "#{tmp_dir}/symlinktest"
-    FileUtils.mv "#{tmp_dir}/secrets-sanitized_manifest_1.json", "#{tmp_dir}/symlinktest"
-    FileUtils.ln_s "#{tmp_dir}/symlinktest/sanitized_manifest_1.yml", "#{tmp_dir}/symlinktest/symlink.yml"
+    FileUtils.mv "#{tmp_dir}/sanitized_manifest_with_simple_values.yml", "#{tmp_dir}/symlinktest"
+    FileUtils.mv "#{tmp_dir}/secrets-sanitized_manifest_with_simple_values.json", "#{tmp_dir}/symlinktest"
+    FileUtils.ln_s "#{tmp_dir}/symlinktest/sanitized_manifest_with_simple_values.yml", "#{tmp_dir}/symlinktest/symlink.yml"
 
     stdout, stderr, status = Open3.capture3("#{desanitizer_executable} -s #{tmp_dir}/symlinktest -i #{tmp_dir}/symlinktest/symlink.yml --verbose")
 
-    FileUtils.cp "#{tmp_dir}/symlinktest/sanitized_manifest_1.yml",          tmp_dir
-    FileUtils.cp "#{tmp_dir}/symlinktest/secrets-sanitized_manifest_1.json", tmp_dir
+    FileUtils.cp "#{tmp_dir}/symlinktest/sanitized_manifest_with_simple_values.yml",          tmp_dir
+    FileUtils.cp "#{tmp_dir}/symlinktest/secrets-sanitized_manifest_with_simple_values.json", tmp_dir
     expect(stdout).to eq("")
     expect(stderr).to match(/Resolving symlink/)
     expect(status.exitstatus).to eq(0)
@@ -110,8 +110,8 @@ describe "Desanitizer executable" do
       Dir.chdir(tmp_dir) # Move pwd to tmp dir
       stdout, stderr, _ = Open3.capture3(desanitizer_executable)
       Dir.chdir(current) # Move pwd back to rspec doesn't freak out
-      expect(compare_yml("#{tmp_dir}/sanitized_manifest_1.yml",
-        "#{work_dir}/fixture/manifest_1.yml")).to be_truthy
+      expect(compare_yml("#{tmp_dir}/sanitized_manifest_with_simple_values.yml",
+        "#{work_dir}/fixture/manifest_with_simple_values.yml")).to be_truthy
     end
 
     it 'ignores comments in the config file' do
@@ -125,7 +125,7 @@ describe "Desanitizer executable" do
       stdout, stderr, _ = Open3.capture3("#{desanitizer_executable} --verbose")
       Dir.chdir(current) # Move pwd back to rspec doesn't freak out
 
-      ymls_are_the_same = compare_yml("#{tmp_dir}/sanitized_manifest_1.yml", "#{work_dir}/fixture/manifest_1.yml")
+      ymls_are_the_same = compare_yml("#{tmp_dir}/sanitized_manifest_with_simple_values.yml", "#{work_dir}/fixture/manifest_with_simple_values.yml")
       expect(ymls_are_the_same).to be_truthy
     end
 
@@ -189,12 +189,12 @@ describe "Desanitizer executable" do
 
     context "when --create-config argument is given with a single file as input" do
       it "displays an message that a config file won't be created" do
-        _, stderr, _ = Open3.capture3("#{desanitizer_executable} --verbose --create-config -i #{tmp_dir}/manifest_1.yml -s #{tmp_dir}")
+        _, stderr, _ = Open3.capture3("#{desanitizer_executable} --verbose --create-config -i #{tmp_dir}/manifest_with_simple_values.yml -s #{tmp_dir}")
         expect(stderr).to match(/A config file will only be created if a directory is given as input./)
       end
 
       it "exits with status 1" do
-        _, _, status = Open3.capture3("#{desanitizer_executable} --verbose --create-config -i #{tmp_dir}/manifest_1.yml -s #{tmp_dir}")
+        _, _, status = Open3.capture3("#{desanitizer_executable} --verbose --create-config -i #{tmp_dir}/manifest_with_simple_values.yml -s #{tmp_dir}")
         expect(status.exitstatus).to eq(1)
       end
     end

@@ -47,7 +47,7 @@ describe Sanitizer do
   end
 
   context 'when given a single file' do
-    let(:manifest_to_modify) { "manifest_1.yml" }
+    let(:manifest_to_modify) { "manifest_with_simple_values.yml" }
 
     it 'extracts secrets to another file' do
       secrets_file = "#{tmp_dir}/secrets-sanitized_#{manifest_to_modify.gsub(".yml", ".json")}"
@@ -63,7 +63,7 @@ describe Sanitizer do
   end
 
   context 'when given a directory with multiple files' do
-    let(:manifest_to_modify) { "manifest_8.yml" }
+    let(:manifest_to_modify) { "manifest_multiline.yml" }
 
     it 'works with multiple files in the directory' do
       # changing the -s argument to /dev/null passes this test. Wat.
@@ -79,9 +79,9 @@ describe Sanitizer do
 
   it 'skips symlink files when passed a directory as input' do
     Dir.mkdir("#{tmp_dir}/symlinktest")
-    FileUtils.cp "#{tmp_dir}/sanitized_manifest_1.yml", "#{tmp_dir}/symlinktest"
-    FileUtils.cp "#{tmp_dir}/secrets-sanitized_manifest_1.json", "#{tmp_dir}/symlinktest"
-    FileUtils.ln_s "#{tmp_dir}/symlinktest/manifest_1.yml", "#{tmp_dir}/symlinktest/symlink.yml"
+    FileUtils.cp "#{tmp_dir}/sanitized_manifest_with_simple_values.yml", "#{tmp_dir}/symlinktest"
+    FileUtils.cp "#{tmp_dir}/secrets-sanitized_manifest_with_simple_values.json", "#{tmp_dir}/symlinktest"
+    FileUtils.ln_s "#{tmp_dir}/symlinktest/manifest_with_simple_values.yml", "#{tmp_dir}/symlinktest/symlink.yml"
 
     stdout, stderr, status = Open3.capture3("#{sanitizer_executable} -s #{tmp_dir}/symlinktest -i #{tmp_dir}/symlinktest --verbose")
     expect(stdout).to eq("")
@@ -91,14 +91,14 @@ describe Sanitizer do
 
   it 'process the symlinked file when passed as a single argument' do
     Dir.mkdir("#{tmp_dir}/symlinktest")
-    FileUtils.mv "#{tmp_dir}/sanitized_manifest_1.yml", "#{tmp_dir}/symlinktest"
-    FileUtils.mv "#{tmp_dir}/secrets-sanitized_manifest_1.json", "#{tmp_dir}/symlinktest"
-    FileUtils.ln_s "#{tmp_dir}/symlinktest/sanitized_manifest_1.yml", "#{tmp_dir}/symlinktest/symlink.yml"
+    FileUtils.mv "#{tmp_dir}/sanitized_manifest_with_simple_values.yml", "#{tmp_dir}/symlinktest"
+    FileUtils.mv "#{tmp_dir}/secrets-sanitized_manifest_with_simple_values.json", "#{tmp_dir}/symlinktest"
+    FileUtils.ln_s "#{tmp_dir}/symlinktest/sanitized_manifest_with_simple_values.yml", "#{tmp_dir}/symlinktest/symlink.yml"
 
     stdout, stderr, status = Open3.capture3("#{sanitizer_executable} -s #{tmp_dir}/symlinktest -i #{tmp_dir}/symlinktest/symlink.yml --verbose")
 
-    FileUtils.cp "#{tmp_dir}/symlinktest/sanitized_manifest_1.yml",          tmp_dir
-    FileUtils.cp "#{tmp_dir}/symlinktest/secrets-sanitized_manifest_1.json", tmp_dir
+    FileUtils.cp "#{tmp_dir}/symlinktest/sanitized_manifest_with_simple_values.yml",          tmp_dir
+    FileUtils.cp "#{tmp_dir}/symlinktest/secrets-sanitized_manifest_with_simple_values.json", tmp_dir
     expect(stdout).to eq("")
     expect(stderr).to match(/Resolving symlink/)
     expect(status.exitstatus).to eq(0)
@@ -187,12 +187,12 @@ describe Sanitizer do
 
     context "when --create-config argument is given with a single file as input" do
       it "displays an message that a config file won't be created" do
-        _, stderr, _ = Open3.capture3("#{sanitizer_executable} --create-config -i #{tmp_dir}/manifest_1.yml -s #{tmp_dir}")
+        _, stderr, _ = Open3.capture3("#{sanitizer_executable} --create-config -i #{tmp_dir}/manifest_with_simple_values.yml -s #{tmp_dir}")
         expect(stderr).to match(/A config file will only be created if a directory is given as input./)
       end
 
       it "exits with status 1" do
-        _, _, status = Open3.capture3("#{sanitizer_executable} --create-config -i #{tmp_dir}/manifest_1.yml -s #{tmp_dir}")
+        _, _, status = Open3.capture3("#{sanitizer_executable} --create-config -i #{tmp_dir}/manifest_with_simple_values.yml -s #{tmp_dir}")
         expect(status.exitstatus).to eq(1)
       end
     end

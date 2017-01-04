@@ -43,11 +43,11 @@ describe Desanitizer::DesanitizeExecutor do
   end
 
   context "when given a simple file" do
-    let(:original_file) { "#{tmp_dir}/sanitized_manifest_1.yml" }
+    let(:original_file) { "#{tmp_dir}/sanitized_manifest_with_simple_values.yml" }
 
     it 'replaces mustache keys with the values from secrets file' do
       Desanitizer::DesanitizeExecutor.execute(manifest_path: original_file, secrets_path: tmp_dir)
-      ymls_are_the_same = compare_yml(original_file, "#{tmp_dir}/manifest_1.yml")
+      ymls_are_the_same = compare_yml(original_file, "#{tmp_dir}/manifest_with_simple_values.yml")
       expect(ymls_are_the_same).to be_truthy
     end
   end
